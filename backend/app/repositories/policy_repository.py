@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.models.policy import Policy
 from app.schemas.policy import PolicyCreate, PolicyUpdate
 
+
 class PolicyRepository:
     def get(self, db: Session, id: int) -> Optional[Policy]:
         return db.query(Policy).filter(Policy.id == id).first()
@@ -14,10 +15,7 @@ class PolicyRepository:
         return db.query(Policy).offset(skip).limit(limit).all()
 
     def create(self, db: Session, *, obj_in: PolicyCreate) -> Policy:
-        db_obj = Policy(
-            agent_id=obj_in.agent_id,
-            policy_yaml=obj_in.policy_yaml
-        )
+        db_obj = Policy(agent_id=obj_in.agent_id, policy_yaml=obj_in.policy_yaml)
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
@@ -28,10 +26,10 @@ class PolicyRepository:
             update_data = obj_in
         else:
             update_data = obj_in.model_dump(exclude_unset=True)
-        
+
         for field in update_data:
             setattr(db_obj, field, update_data[field])
-        
+
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
@@ -42,5 +40,6 @@ class PolicyRepository:
         db.delete(obj)
         db.commit()
         return obj
+
 
 policy_repository = PolicyRepository()

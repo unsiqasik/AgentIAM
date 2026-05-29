@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker
 
 import sys
 import os
+
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "backend"))
 
 from app.main import app
@@ -23,27 +24,31 @@ engine = create_engine(
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+
 @pytest.fixture(scope="session")
 def db() -> Generator:
     Base.metadata.create_all(bind=engine)
     session = TestingSessionLocal()
-    
+
     # Create an admin user for testing
     admin_user = session.query(User).filter(User.username == "admin").first()
     if not admin_user:
         admin_user = User(
             username="admin",
             hashed_password=get_password_hash("admin"),
-            role=UserRole.ADMIN
+            role=UserRole.ADMIN,
         )
         session.add(admin_user)
         session.commit()
-    
+
     yield session
     session.close()
     Base.metadata.drop_all(bind=engine)
     if os.path.exists("./test.db"):
-        os.remove("./test.db")
+        try:
+            os.remove("./test.db")
+        except PermissionError:
+            pass
 
 @pytest.fixture(scope="module")
 def client(db) -> Generator:
@@ -52,10 +57,12 @@ def client(db) -> Generator:
             yield db
         finally:
             pass
+
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as c:
         yield c
     del app.dependency_overrides[get_db]
+
 
 @pytest.fixture(scope="module")
 def admin_token_headers(client: TestClient) -> dict:

@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
+from sqlalchemy import Column, Integer, DateTime, ForeignKey, Text
 from sqlalchemy.sql import func
 from app.db.base_class import Base
+
 
 class Policy(Base):
     id = Column(Integer, primary_key=True, index=True)

@@ -8,6 +8,7 @@ from app.schemas.policy import Policy, PolicyCreate, PolicyUpdate
 
 router = APIRouter()
 
+
 @router.get("/", response_model=List[Policy])
 def read_policies(
     db: Session = Depends(deps.get_db),
@@ -21,6 +22,7 @@ def read_policies(
     policies = policy_repository.get_multi(db, skip=skip, limit=limit)
     return policies
 
+
 @router.post("/", response_model=Policy)
 def create_policy(
     *,
@@ -32,6 +34,7 @@ def create_policy(
     Create new policy.
     """
     return policy_service.create_policy(db, obj_in=policy_in)
+
 
 @router.get("/{id}", response_model=Policy)
 def read_policy_by_id(
@@ -47,6 +50,7 @@ def read_policy_by_id(
         raise HTTPException(status_code=404, detail="Policy not found")
     return policy
 
+
 @router.get("/agent/{agent_id}", response_model=Policy)
 def read_policy_by_agent_id(
     agent_id: int,
@@ -61,6 +65,7 @@ def read_policy_by_agent_id(
         raise HTTPException(status_code=404, detail="Policy not found for this agent")
     return policy
 
+
 @router.put("/{id}", response_model=Policy)
 def update_policy(
     *,
@@ -73,6 +78,7 @@ def update_policy(
     Update a policy.
     """
     return policy_service.update_policy(db, id=id, obj_in=policy_in)
+
 
 @router.delete("/{id}", response_model=Policy)
 def delete_policy(

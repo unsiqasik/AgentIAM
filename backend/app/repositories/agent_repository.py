@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.models.agent import Agent
 from app.schemas.agent import AgentCreate, AgentUpdate
 
+
 class AgentRepository:
     def get(self, db: Session, id: int) -> Optional[Agent]:
         return db.query(Agent).filter(Agent.id == id).first()
@@ -14,10 +15,7 @@ class AgentRepository:
         return db.query(Agent).offset(skip).limit(limit).all()
 
     def create(self, db: Session, *, obj_in: AgentCreate) -> Agent:
-        db_obj = Agent(
-            name=obj_in.name,
-            description=obj_in.description
-        )
+        db_obj = Agent(name=obj_in.name, description=obj_in.description)
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
@@ -28,10 +26,10 @@ class AgentRepository:
             update_data = obj_in
         else:
             update_data = obj_in.model_dump(exclude_unset=True)
-        
+
         for field in update_data:
             setattr(db_obj, field, update_data[field])
-        
+
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
@@ -42,5 +40,6 @@ class AgentRepository:
         db.delete(obj)
         db.commit()
         return obj
+
 
 agent_repository = AgentRepository()

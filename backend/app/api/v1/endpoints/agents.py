@@ -7,6 +7,7 @@ from app.schemas.agent import Agent, AgentCreate, AgentUpdate
 
 router = APIRouter()
 
+
 @router.get("/", response_model=List[Agent])
 def read_agents(
     db: Session = Depends(deps.get_db),
@@ -19,6 +20,7 @@ def read_agents(
     """
     agents = agent_repository.get_multi(db, skip=skip, limit=limit)
     return agents
+
 
 @router.post("/", response_model=Agent)
 def create_agent(
@@ -39,6 +41,7 @@ def create_agent(
     agent = agent_repository.create(db, obj_in=agent_in)
     return agent
 
+
 @router.get("/{id}", response_model=Agent)
 def read_agent_by_id(
     id: int,
@@ -52,6 +55,7 @@ def read_agent_by_id(
     if not agent:
         raise HTTPException(status_code=404, detail="Agent not found")
     return agent
+
 
 @router.put("/{id}", response_model=Agent)
 def update_agent(
@@ -69,6 +73,7 @@ def update_agent(
         raise HTTPException(status_code=404, detail="Agent not found")
     agent = agent_repository.update(db, db_obj=agent, obj_in=agent_in)
     return agent
+
 
 @router.delete("/{id}", response_model=Agent)
 def delete_agent(

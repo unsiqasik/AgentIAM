@@ -1,9 +1,10 @@
 import yaml
-from typing import Dict, Any, Tuple
+from typing import Tuple
 from sqlalchemy.orm import Session
 from app.repositories.policy_repository import policy_repository
 from app.repositories.audit_log_repository import audit_log_repository
 from app.schemas.audit import AuditLogCreate
+
 
 class AuthzService:
     def check_permission(
@@ -11,24 +12,24 @@ class AuthzService:
     ) -> Tuple[bool, str]:
         # 1. Get policy for agent
         policy_obj = policy_repository.get_by_agent_id(db, agent_id=agent_id)
-        
+
         decision = False
         reason = "Permission not granted"
-        
+
         if not policy_obj:
             reason = "No policy found for this agent"
         else:
             try:
                 policy_data = yaml.safe_load(policy_obj.policy_yaml)
                 permissions = policy_data.get("permissions", {})
-                
+
                 # Check for resource-level wildcard
                 if permissions.get("*") is True:
                     decision = True
                     reason = "Wildcard resource permission granted"
                 elif resource in permissions:
                     resource_perms = permissions[resource]
-                    
+
                     # Check if resource perms is a boolean (grant all)
                     if resource_perms is True:
                         decision = True
@@ -46,7 +47,7 @@ class AuthzService:
                         elif resource_perms.get("*") is True:
                             decision = True
                             reason = f"Wildcard action permission granted for resource: {resource}"
-                
+
             except Exception as e:
                 decision = False
                 reason = f"Error evaluating policy: {str(e)}"
@@ -57,10 +58,11 @@ class AuthzService:
             resource=resource,
             action=action,
             decision=decision,
-            reason=reason
+            reason=reason,
         )
         audit_log_repository.create(db, obj_in=audit_in)
 
         return decision, reason
+
 
 authz_service = AuthzService()

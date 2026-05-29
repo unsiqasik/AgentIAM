@@ -2,15 +2,19 @@ from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel
 
+
 class PolicyBase(BaseModel):
     agent_id: int
     policy_yaml: str
 
+
 class PolicyCreate(PolicyBase):
     pass
 
+
 class PolicyUpdate(BaseModel):
     policy_yaml: Optional[str] = None
+
 
 class PolicyInDBBase(PolicyBase):
     id: int
@@ -19,6 +23,7 @@ class PolicyInDBBase(PolicyBase):
 
     class Config:
         from_attributes = True
+
 
 class Policy(PolicyInDBBase):
     pass

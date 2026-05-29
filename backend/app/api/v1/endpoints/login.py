@@ -1,4 +1,3 @@
-from datetime import timedelta
 from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
@@ -8,6 +7,7 @@ from app.services.auth_service import auth_service
 from app.schemas.token import Token
 
 router = APIRouter()
+
 
 @router.post("/login/access-token", response_model=Token)
 def login_access_token(
@@ -21,5 +21,5 @@ def login_access_token(
     )
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
-    
+
     return auth_service.login(user)

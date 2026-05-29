@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.api import deps
@@ -8,20 +8,24 @@ from app.schemas.audit import AuditLog, CheckPermissionRequest, CheckPermissionR
 
 router = APIRouter()
 
+
 @router.get("/", response_model=List[AuditLog])
 def read_audit_logs(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
-    agent_id: int = None,
+    agent_id: Optional[int] = None,
     current_user: Any = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Retrieve audit logs.
     """
     if agent_id:
-        return audit_log_repository.get_by_agent(db, agent_id=agent_id, skip=skip, limit=limit)
+        return audit_log_repository.get_by_agent(
+            db, agent_id=agent_id, skip=skip, limit=limit
+        )
     return audit_log_repository.get_multi(db, skip=skip, limit=limit)
+
 
 @router.get("/{id}", response_model=AuditLog)
 def read_audit_log_by_id(
@@ -36,6 +40,7 @@ def read_audit_log_by_id(
     if not audit_log:
         raise HTTPException(status_code=404, detail="Audit log not found")
     return audit_log
+
 
 @router.post("/check-permission", response_model=CheckPermissionResponse)
 def check_permission(
