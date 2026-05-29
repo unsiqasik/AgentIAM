@@ -1,0 +1,16 @@
+name: Security Report
+description: Report a security vulnerability
+labels: ["type:security"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Note:** If you find a security vulnerability, please do NOT open a public issue. 
+        Follow the instructions in our [SECURITY.md](https://github.com/SHAURYASANYAL3/AgentIAM/blob/main/SECURITY.md) instead.
+  - type: textarea
+    id: security-description
+    attributes:
+      label: Description of the security issue
+      placeholder: Provide details about the vulnerability.
+    validations:
+      required: true
