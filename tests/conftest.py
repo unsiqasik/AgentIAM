@@ -50,6 +50,7 @@ def db() -> Generator:
         except PermissionError:
             pass
 
+
 @pytest.fixture(scope="module")
 def client(db) -> Generator:
     def override_get_db():
