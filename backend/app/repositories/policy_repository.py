@@ -36,10 +36,11 @@ class PolicyRepository:
         return db_obj
 
     def remove(self, db: Session, *, id: int) -> Policy:
-        obj = db.query(Policy).get(id)
-        db.delete(obj)
-        db.commit()
-        return obj
+        obj = db.get(Policy, id)
+        if obj:
+            db.delete(obj)
+            db.commit()
+        return obj  # type: ignore[return-value]
 
 
 policy_repository = PolicyRepository()

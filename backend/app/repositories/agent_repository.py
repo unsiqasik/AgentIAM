@@ -36,10 +36,11 @@ class AgentRepository:
         return db_obj
 
     def remove(self, db: Session, *, id: int) -> Agent:
-        obj = db.query(Agent).get(id)
-        db.delete(obj)
-        db.commit()
-        return obj
+        obj = db.get(Agent, id)
+        if obj:
+            db.delete(obj)
+            db.commit()
+        return obj  # type: ignore[return-value]
 
 
 agent_repository = AgentRepository()

@@ -1,13 +1,18 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text
+from datetime import datetime
+from typing import Optional
+from sqlalchemy import Integer, String, DateTime, Boolean, Text
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 from app.db.base_class import Base
 
 
 class AuditLog(Base):
-    id = Column(Integer, primary_key=True, index=True)
-    timestamp = Column(DateTime(timezone=True), server_default=func.now())
-    agent_id = Column(Integer, nullable=False, index=True)
-    resource = Column(String, nullable=False, index=True)
-    action = Column(String, nullable=False, index=True)
-    decision = Column(Boolean, nullable=False)
-    reason = Column(Text, nullable=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    timestamp: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    agent_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    resource: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    action: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    decision: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
