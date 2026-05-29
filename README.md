@@ -1,395 +1,82 @@
-<div align="center">
+# AgentIAM
 
-<img src="https://img.shields.io/badge/AgentWatch-v0.1.0-black?style=for-the-badge" />
+**Identity and Access Management for AI Agents**
 
-# AgentWatch
+AgentIAM provides a centralized service to evaluate, enforce, and audit permissions when AI agents interact with external tools, APIs, and resources.
 
-### Your AI agent is lying to you.
-### AgentWatch catches it — before it deletes your database.
+## 🚀 Features
 
-<br/>
+- **Centralized Policy Management**: Define what your AI agents can and cannot do using intuitive YAML-based policies.
+- **Strict Authorization Engine**: Evaluate permissions dynamically before agents execute critical actions.
+- **Comprehensive Audit Trail**: Maintain an immutable ledger of every authorization decision for security and compliance.
+- **Modern Tech Stack**: Built with FastAPI (Python) for a high-performance backend and React/Vite for a responsive dashboard.
 
-[![Tests](https://img.shields.io/badge/tests-47_passing-brightgreen?style=flat-square)](https://github.com/sreerevanth/AgentWatch)
-[![Coverage](https://img.shields.io/codecov/c/github/sreerevanth/AgentWatch?style=flat-square)](https://codecov.io/gh/sreerevanth/AgentWatch)
-[![License](https://img.shields.io/badge/license-Apache_2.0-blue?style=flat-square)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.10+-blue?style=flat-square&logo=python)](https://python.org)
-[![Discord](https://img.shields.io/badge/Discord-Join_Community-5865F2?style=flat-square&logo=discord)](https://discord.gg/n2RzUmZ4)
-[![Stars](https://img.shields.io/github/stars/sreerevanth/AgentWatch?style=flat-square&color=gold)](https://github.com/sreerevanth/AgentWatch/stargazers)
-[![Forks](https://img.shields.io/github/forks/sreerevanth/AgentWatch?style=flat-square&color=orange)](https://github.com/sreerevanth/AgentWatch/network)
-[![NSoC](https://img.shields.io/badge/NSoC_26'-participating-purple?style=flat-square)](https://github.com/sreerevanth/AgentWatch/issues)
+## 🏗️ Architecture
 
-<br/>
+The system consists of three main components:
+1. **Frontend (Dashboard)**: React-based web application for managing agents, policies, and viewing audit logs.
+2. **Backend (API & Authz Engine)**: FastAPI Python service handling policy evaluation, user authentication, and data persistence.
+3. **Database**: PostgreSQL for storing agents, policies, and audit logs.
 
-```
-pip install agentwatch-ai
-agentwatch watch "your agent command"
-```
+For detailed architecture information, please see [ARCHITECTURE.md](ARCHITECTURE.md).
 
-*One command. Every failure caught. Before it runs.*
+## 🛠️ Getting Started
 
-<br/>
+### Prerequisites
+- Python 3.10+
+- Node.js 18+
+- Docker & Docker Compose
+- Git
 
-[**Quick Start**](#quick-start) · [**How It Works**](#how-it-works) · [**Supported Frameworks**](#supported-frameworks) · [**Discord**](https://discord.gg/n2RzUmZ4) · [**Contribute**](#contributing)
+### Backend Setup
 
-</div>
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+2. Create and activate a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Windows: venv\Scripts\activate
+   ```
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Run the server:
+   ```bash
+   uvicorn app.main:app --reload
+   ```
 
----
+### Frontend Setup
 
-## The Problem Nobody Is Solving
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Run the development server:
+   ```bash
+   npm run dev
+   ```
 
-## Performance
+## 🤝 Contributing
 
-**Benchmark results (sample from a developer machine):**
+We welcome contributions! Please see our [DEVELOPMENT.md](DEVELOPMENT.md) and [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to set up your environment, run tests, and submit Pull Requests. 
 
-| Scenario | Mean (ms) | p95 (ms) | p99 (ms) | Overhead vs baseline |
-|---|---|---|---|---|
-| Raw agent call (baseline) | 0.45 | 0.60 | 0.78 | – |
-| watch() without safety | 0.82 | 1.05 | 1.30 | +82% |
-| watch() with safety | 1.12 | 1.45 | 1.78 | +149% |
-| Full API round‑trip | 3.85 | 4.60 | 5.20 | +755% |
+For first-time contributors, check out [FIRST_CONTRIBUTION.md](FIRST_CONTRIBUTION.md).
 
-*All timings are mean, p95 and p99 values computed over 1 000 individual samples on a 2024‑class laptop (Intel i7, 16 GB RAM).*
+## 🔒 Security
 
-The measured sync watch() p99 is **1.30 ms**, which exceeds the **< 1 ms** target; async agents are not benchmarked in this script, so no async p99 target is reported.
+For our security policy and how to report vulnerabilities, please read [SECURITY.md](SECURITY.md).
 
----
+## 🗺️ Roadmap
 
-```
-Agent runs.
-Output looks correct.
-Database is corrupted.
-You find out 3 hours later when a customer complains.
-```
+See [ROADMAP.md](ROADMAP.md) for planned features and technical improvements.
 
-**1 in 20 AI agent requests fail silently in production.**
+## 📜 License
 
-Current observability tools — Langfuse, Phoenix, Datadog — tell you what happened *after* it happened. By then the damage is done.
-
-The real problem: **an agent that confidently fails is indistinguishable from an agent that correctly succeeds.** 
-
-Unless you have a layer watching the *reasoning*, not just the output.
-
-That layer didn't exist.
-
-**Until now.**
-
----
-
-## How It Works
-
-AgentWatch sits between your agent and the world.
-
-```
-Your Agent
-    │
-    ▼
-┌─────────────────────────────────────┐
-│           AgentWatch                │
-│                                     │
-│  1. Captures every reasoning step   │
-│  2. Independent model scores it     │
-│  3. Blocks dangerous actions        │
-│  4. Fires alert if confidence drops │
-│  5. Checkpoints for rollback        │
-└─────────────────────────────────────┘
-    │
-    ▼
- The World (tools, APIs, databases)
-```
-
-The key insight: **an agent scoring its own reasoning is structurally biased toward overconfidence.** It almost always thinks it did well — even when it didn't.
-
-AgentWatch deploys a second model, architecturally separate, with no access to the agent's own reasoning trace. Its only job: find failure before the next action fires.
-
----
-
-## Quick Start
-
-```bash
-# Install
-pip install agentwatch
-
-# Configure environment variables (optional)
-# Copy the template and edit it to set custom DB passwords, API keys, etc.
-cp .env.example .env
-
-# Start the dashboard
-docker compose up -d
-
-# Wrap your agent
-agentwatch watch "Build me a REST API"
-```
-
-**Dashboard** → http://localhost:3000  
-**API Docs** → http://localhost:8000/docs
-
-That's it. Zero config for default settings, or customize via the [.env.example](.env.example) file. Real data immediately.
-
----
-
-## Supported Frameworks
-
-AgentWatch wraps your existing agent. **You change nothing.**
-
-<details>
-<summary><b>Claude Code</b></summary>
-
-```bash
-agentwatch watch "Build me a REST API"
-```
-</details>
-
-<details>
-<summary><b>LangChain</b></summary>
-
-```python
-from agentwatch.adapters.langchain import AgentWatchCallbackHandler
-
-handler = AgentWatchCallbackHandler()
-agent = AgentExecutor(agent=..., callbacks=[handler])
-```
-</details>
-
-<details>
-<summary><b>CrewAI</b></summary>
-
-```python
-from agentwatch.adapters.crewai import AgentWatchCrewAdapter
-
-adapter = AgentWatchCrewAdapter(crew=my_crew)
-await adapter.run()
-```
-</details>
-
-<details>
-<summary><b>AutoGPT</b></summary>
-
-```python
-from agentwatch.adapters.autogpt import AutoGPTAdapter
-
-adapter = AutoGPTAdapter(session_id="session-1")
-await adapter.on_action(action)
-```
-</details>
-
-<details>
-<summary><b>LangGraph</b></summary>
-
-```python
-from agentwatch.adapters.langgraph import AgentWatchLangGraphAdapter
-
-adapter = AgentWatchLangGraphAdapter(graph=my_graph)
-result = await adapter.run(input)
-```
-</details>
-
-<details>
-<summary><b>AutoGen</b></summary>
-
-```python
-from agentwatch.adapters.autogen import AgentWatchAutoGenAdapter
-
-adapter = AgentWatchAutoGenAdapter(agents=agent_list)
-await adapter.run(task)
-```
-</details>
-
-<details>
-<summary><b>Universal one-liner (any framework)</b></summary>
-
-```python
-from agentwatch import watch
-
-agent = watch(your_agent)  # auto-detects framework
-```
-</details>
-
----
-
-## Core Features
-
-### 🧠 Reasoning Auditor
-The feature nobody else has built.
-
-```python
-from agentwatch.reasoning.auditor import ReasoningAuditor
-
-auditor = ReasoningAuditor()
-result = await auditor.score_step(step)
-
-print(result.confidence)          # 0.0 – 1.0
-print(result.hallucination_risk)  # low / medium / high  
-print(result.goal_drift)          # True if agent is off-task
-```
-
-When confidence drops below your threshold, the next action is **held** — not logged after the fact. An alert fires. You decide what happens next.
-
----
-
-### 🛡️ Safety Engine
-
-```python
-from agentwatch.core.safety import SafetyEngine
-
-engine = SafetyEngine()
-result = await engine.check_event(event)
-
-if result.is_blocked:
-    print(f"Blocked: {result.safety.reasons}")
-    print(f"Risk level: {result.safety.risk_level.value}")
-```
-
-**Blocked by default:**
-- `rm -rf /` · `curl | bash` · disk formatting
-- Credential exfiltration · `DROP TABLE`
-- Mass deletion · privilege escalation
-- 40+ additional critical patterns
-
-**Pre-execution. Not post-hoc logging.**
-
----
-
-### ⏪ One-Click Rollback
-
-```bash
-agentwatch rollback <session-id> --to-step 12
-```
-
-Every step is a git-backed filesystem snapshot. Irreversible actions become reversible. Click rollback in the dashboard or use the CLI.
-
----
-
-### 📊 Live Dashboard
-
-Real-time WebSocket stream of every action your agent takes. Confidence meter updating per step. Colour-coded by span type. No polling. No refresh.
-
----
-
-### 💾 Persistent Memory
-
-Cross-session episodic, semantic, and procedural memory. Your agent remembers what it decided and why — across restarts, across sessions.
-
----
-
-### 💰 Cost Intelligence
-
-Per-session token budget with hard stop. Real-time spend tracking. Alerts at 80%. Blocks at 100%. Prevents runaway agents from bankrupting you overnight.
-
----
-
-### 🔔 Alerting
-
-Slack + PagerDuty when confidence drops or actions are blocked. Every alert contains full context — not just "something failed."
-
----
-
-## REST API
-
-```
-GET  /api/v1/sessions
-GET  /api/v1/sessions/{id}/replay
-GET  /api/v1/sessions/{id}/confidence
-GET  /api/v1/sessions/{id}/checkpoints
-POST /api/v1/sessions/{id}/rollback
-GET  /api/v1/safety/blocked
-GET  /api/v1/dashboard/summary
-WS   /ws/events
-```
-
-Full Swagger docs at `localhost:8000/docs`
-
----
-
-## What Nobody Else Has Built
-
-| Feature | AgentWatch | Langfuse | Phoenix | Datadog |
-|---------|:----------:|:--------:|:-------:|:-------:|
-| Pre-execution blocking | ✅ | ❌ | ❌ | ❌ |
-| Independent reasoning auditor | ✅ | ❌ | ❌ | ❌ |
-| Git-backed rollback | ✅ | ❌ | ❌ | ❌ |
-| Session replay | ✅ | ❌ | ✅ | ⚠️ |
-| Cross-session memory | ✅ | ❌ | ❌ | ❌ |
-| Goal drift detection | ✅ | ❌ | ❌ | ❌ |
-| Hallucination risk per step | ✅ | ❌ | ❌ | ❌ |
-
----
-
-## Stack
-
-| Layer | Tech |
-|-------|------|
-| Backend | FastAPI · PostgreSQL · Redis · Celery |
-| Frontend | Next.js · Tailwind · Recharts · WebSockets |
-| Infra | Docker Compose · GitHub Actions CI |
-| Telemetry | OpenTelemetry compatible |
-
----
-
-## Verified
-
-```
-✅ 47/47 tests passing
-✅ docker compose up — zero errors  
-✅ API live at localhost:8000
-✅ Dashboard live at localhost:3000
-✅ Claude Code, LangChain, CrewAI, AutoGPT adapters working
-```
-
----
-
-## Contributing
-
-AgentWatch is built in the open. Contributors get their name on the landing page after their first merged PR.
-
-**Before you start → join the Discord:** https://discord.gg/n2RzUmZ4
-
-Get help picking the right issue, discuss your approach, and ship faster.
-
-```bash
-git clone https://github.com/sreerevanth/AgentWatch
-cd AgentWatch
-docker compose up -d
-pip install -e ".[dev]"
-pytest tests/
-```
-
-Browse [open issues](https://github.com/sreerevanth/AgentWatch/issues) — tagged by difficulty: `good first issue` · `intermediate` · `advanced`
-
----
-
-## Roadmap
-
-AgentWatch v0.2.0 is being built now — 90 features across 10 phases including:
-
-- Causal memory graph (cross-session reasoning trails)
-- Inter-agent causal DAG (multi-agent failure tracing)  
-- OWASP Agentic Top 10 scanner
-- EU AI Act Article 15 compliance package
-- Counterfactual replay ("what if step 3 was different")
-- Open reasoning trace schema (the OTEL play)
-
-Every open issue on the roadmap is available to contributors. [Browse them here.](https://github.com/sreerevanth/AgentWatch/issues)
-
----
-
-## Community
-
-💬 **Discord** — discord.gg/n2RzUmZ4  
-Contributors discuss issues, get unblocked, and ship together.  
-Your name on the landing page after your first PR merges.
-
----
-
-## License
-
-Apache 2.0 — use it, fork it, build on it.
-
----
-
-<div align="center">
-
-Built by [sreerevanth](https://github.com/sreerevanth)
-
-**[⭐ Star it](https://github.com/sreerevanth/AgentWatch) · [🐛 Open an issue](https://github.com/sreerevanth/AgentWatch/issues) · [💬 Join Discord](https://discord.gg/n2RzUmZ4)**
-
-</div>
+This project is licensed under the terms described in the [LICENSE](LICENSE) file.
