@@ -264,15 +264,15 @@ A: You need Python 3.10+, PostgreSQL, and optionally Docker. The frontend requir
 A: Yes. You can run the FastAPI backend directly with `uvicorn` and the frontend with `npm run dev`. See [DEVELOPMENT.md](DEVELOPMENT.md) for local setup instructions.
 
 **Q: How do I configure the database connection?**
-A: Set the `DATABASE_URL` environment variable (e.g., `postgresql://user:pass@localhost:5432/agentiam`). The application uses this to connect to PostgreSQL.
+A: Set the `SQLALCHEMY_DATABASE_URI` environment variable (e.g., `postgresql://user:***@localhost:5432/agentiam`). The application uses this to connect to PostgreSQL. You can also configure individual `POSTGRES_SERVER`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` variables.
 
 ### Policies & Authorization
 
 **Q: How do I define permissions for an agent?**
-A: Create a YAML policy file that specifies allowed actions, resources, and conditions. Assign the policy to an agent via the dashboard or API. See the `examples/` directory for sample policies.
+A: Create a YAML policy file that specifies allowed actions, resources, and conditions. Assign the policy to an agent via the dashboard or API.
 
 **Q: Can an agent have multiple policies?**
-A: Yes. An agent can be assigned multiple policies. The authorization engine evaluates all applicable policies and grants access if any policy permits the action (unless explicitly denied).
+A: Not yet. Policy assignment to agents is currently one-to-one. Multi-policy assignment per agent is planned for a future release. The authorization engine evaluates the assigned policy to determine access.
 
 **Q: What happens when an agent tries to perform a denied action?**
 A: The authorization engine returns a DENIED response, and the action is blocked. The event is logged in the immutable audit ledger with full context (agent ID, requested action, timestamp, policy that denied it).
@@ -280,13 +280,13 @@ A: The authorization engine returns a DENIED response, and the action is blocked
 ### Security
 
 **Q: Is AgentIAM production-ready?**
-A: AgentIAM is currently an MVP (v0.1). It is suitable for development and testing. For production use, review the security audit results in the `security/` directory and follow the hardening guide in [DEVELOPMENT.md](DEVELOPMENT.md).
+A: AgentIAM is currently an MVP (v0.1). It is suitable for development and testing. For production use, review the security considerations in [DEVELOPMENT.md](DEVELOPMENT.md) and follow the hardening recommendations.
 
 **Q: How are audit logs protected?**
 A: Audit logs are stored in PostgreSQL with append-only semantics. They cannot be modified or deleted through the API. The audit logger captures every authorization check, regardless of outcome.
 
 **Q: Does AgentIAM support multi-tenancy?**
-A: Not yet. Multi-tenancy support is planned for v0.3. Currently, all agents and policies exist in a single namespace.
+A: Not yet. Multi-tenancy support is planned for a future release (see Roadmap). Currently, all agents and policies exist in a single namespace.
 
 ### Integration
 
@@ -297,7 +297,7 @@ A: Integration guides for LangChain and LlamaIndex are planned for v0.3. You can
 A: Not yet. Webhook support for Slack/Discord notifications on denied actions is planned for v0.3.
 
 **Q: What programming languages does the SDK support?**
-A: The API is REST-based and can be called from any language. A Python SDK is included. Community-contributed SDKs for other languages are welcome.
+A: The API is REST-based and can be called from any language. See the API documentation for request/response formats. Community-contributed SDKs for various languages are welcome.
 
 ---
 
