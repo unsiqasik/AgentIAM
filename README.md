@@ -242,6 +242,65 @@ The engine responds immediately and logs the interaction:
 
 ---
 
+## ❓ Frequently Asked Questions
+
+### General
+
+**Q: What is AgentIAM?**
+A: AgentIAM is an Identity & Access Management system designed specifically for AI agents. It provides centralized authorization, policy enforcement, and audit logging to ensure AI agents only perform actions they are explicitly permitted to do.
+
+**Q: Why do AI agents need IAM?**
+A: AI agents increasingly interact with production systems (databases, APIs, file systems). Without proper access control, a misbehaving agent—or one affected by prompt injection—can cause serious damage. AgentIAM adds a pre-execution authorization layer, similar to how AWS IAM controls human access.
+
+**Q: How does AgentIAM differ from simply removing tools from an agent?**
+A: Removing tools is a blunt approach that limits agent capability. AgentIAM provides fine-grained, policy-based control: you can allow an agent to read a database but not write to it, or permit API calls only to specific endpoints. It also provides audit trails for compliance.
+
+### Installation & Setup
+
+**Q: What are the prerequisites?**
+A: You need Python 3.10+, PostgreSQL, and optionally Docker. The frontend requires Node.js 18+.
+
+**Q: Can I run AgentIAM without Docker?**
+A: Yes. You can run the FastAPI backend directly with `uvicorn` and the frontend with `npm run dev`. See [DEVELOPMENT.md](DEVELOPMENT.md) for local setup instructions.
+
+**Q: How do I configure the database connection?**
+A: Set the `DATABASE_URL` environment variable (e.g., `postgresql://user:pass@localhost:5432/agentiam`). The application uses this to connect to PostgreSQL.
+
+### Policies & Authorization
+
+**Q: How do I define permissions for an agent?**
+A: Create a YAML policy file that specifies allowed actions, resources, and conditions. Assign the policy to an agent via the dashboard or API. See the `examples/` directory for sample policies.
+
+**Q: Can an agent have multiple policies?**
+A: Yes. An agent can be assigned multiple policies. The authorization engine evaluates all applicable policies and grants access if any policy permits the action (unless explicitly denied).
+
+**Q: What happens when an agent tries to perform a denied action?**
+A: The authorization engine returns a DENIED response, and the action is blocked. The event is logged in the immutable audit ledger with full context (agent ID, requested action, timestamp, policy that denied it).
+
+### Security
+
+**Q: Is AgentIAM production-ready?**
+A: AgentIAM is currently an MVP (v0.1). It is suitable for development and testing. For production use, review the security audit results in the `security/` directory and follow the hardening guide in [DEVELOPMENT.md](DEVELOPMENT.md).
+
+**Q: How are audit logs protected?**
+A: Audit logs are stored in PostgreSQL with append-only semantics. They cannot be modified or deleted through the API. The audit logger captures every authorization check, regardless of outcome.
+
+**Q: Does AgentIAM support multi-tenancy?**
+A: Not yet. Multi-tenancy support is planned for v0.3. Currently, all agents and policies exist in a single namespace.
+
+### Integration
+
+**Q: Can I use AgentIAM with LangChain or LlamaIndex?**
+A: Integration guides for LangChain and LlamaIndex are planned for v0.3. You can wrap AgentIAM's authorization check around any tool call today using the REST API.
+
+**Q: Does AgentIAM support webhook notifications?**
+A: Not yet. Webhook support for Slack/Discord notifications on denied actions is planned for v0.3.
+
+**Q: What programming languages does the SDK support?**
+A: The API is REST-based and can be called from any language. A Python SDK is included. Community-contributed SDKs for other languages are welcome.
+
+---
+
 ## 🤝 Contributing
 
 We welcome contributions of all sizes! Here is our standard workflow:
