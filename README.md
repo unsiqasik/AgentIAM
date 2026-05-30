@@ -148,15 +148,14 @@ npm run dev
 Create a YAML policy restricting an agent to read-only database access:
 
 ```yaml
-version: "1.0"
-policies:
-  - effect: "ALLOW"
-    action: "database:read"
-    resource: "production_db"
-  - effect: "DENY"
-    action: "database:write"
-    resource: "*"
+permissions:
+  database:
+    read: true
+    write: false
+    delete: false
 ```
+
+> 📖 See the full [YAML Policy Schema Reference](docs/POLICY_SCHEMA.md) for all supported fields, wildcards, and examples.
 
 ### 2. Check Permission (API)
 When the agent tries to perform an action, ping AgentIAM:
@@ -239,6 +238,18 @@ The engine responds immediately and logs the interaction:
 * Comprehensive security audits and official DockerHub images
 
 *See the full [ROADMAP.md](ROADMAP.md) for more details.*
+
+---
+
+## 📚 Documentation
+
+| Document | Description |
+|----------|-------------|
+| [YAML Policy Schema Reference](docs/POLICY_SCHEMA.md) | Complete reference for defining YAML policies — all fields, wildcards, evaluation logic, examples, and validation rules. |
+| [Architecture](ARCHITECTURE.md) | System architecture and component overview. |
+| [Development Guide](DEVELOPMENT.md) | How to set up a local development environment. |
+| [Contributing](CONTRIBUTING.md) | How to contribute to AgentIAM. |
+| [Security Policy](SECURITY.md) | Security vulnerability reporting guidelines. |
 
 ---
 
