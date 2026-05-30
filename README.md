@@ -275,7 +275,7 @@ A: Create a YAML policy file that specifies allowed actions, resources, and cond
 A: Not yet. Policy assignment to agents is currently one-to-one. Multi-policy assignment per agent is planned for a future release. The authorization engine evaluates the assigned policy to determine access.
 
 **Q: What happens when an agent tries to perform a denied action?**
-A: The authorization engine returns a DENIED response, and the action is blocked. The event is logged in the immutable audit ledger with full context (agent ID, requested action, timestamp, policy that denied it).
+A: The authorization engine returns a DENIED response, and the action is blocked. The event is logged in the immutable audit ledger with full context (agent ID, requested resource, action, decision, reason, and timestamp).
 
 ### Security
 
@@ -283,7 +283,7 @@ A: The authorization engine returns a DENIED response, and the action is blocked
 A: AgentIAM is currently an MVP (v0.1). It is suitable for development and testing. For production use, review the security considerations in [DEVELOPMENT.md](DEVELOPMENT.md) and follow the hardening recommendations.
 
 **Q: How are audit logs protected?**
-A: Audit logs are stored in PostgreSQL with append-only semantics. They cannot be modified or deleted through the API. The audit logger captures every authorization check, regardless of outcome.
+A: Audit logs are write-once through the API (created during authorization checks via `POST /check-permission`). The API only exposes read endpoints (`GET /` and `GET /{id}`) with no update or delete routes. The audit logger captures every authorization check, regardless of outcome.
 
 **Q: Does AgentIAM support multi-tenancy?**
 A: Not yet. Multi-tenancy support is planned for a future release (see Roadmap). Currently, all agents and policies exist in a single namespace.
