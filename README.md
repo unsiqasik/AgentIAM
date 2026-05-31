@@ -148,15 +148,14 @@ npm run dev
 Create a YAML policy restricting an agent to read-only database access:
 
 ```yaml
-version: "1.0"
-policies:
-  - effect: "ALLOW"
-    action: "database:read"
-    resource: "production_db"
-  - effect: "DENY"
-    action: "database:write"
-    resource: "*"
+permissions:
+  database:
+    read: true
+    write: false
+    delete: false
 ```
+
+> 📖 See the full [YAML Policy Schema Reference](docs/POLICY_SCHEMA.md) for all supported fields, wildcards, and examples.
 
 ### 2. Check Permission (API)
 When the agent tries to perform an action, ping AgentIAM:
