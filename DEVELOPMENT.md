@@ -84,3 +84,16 @@ Welcome to the AgentIAM development guide! This document explains how to set up 
 2. Ensure all CI checks pass locally (Lint, Type Check, Tests, Security).
 3. Submit a PR using the [template](.github/pull_request_template.md).
 4. A maintainer will review your PR. At least one approval is required for merge.
+
+## Security Hardening for Production
+
+When deploying AgentIAM in production, follow these recommendations:
+
+1. **Change default secrets**: Replace `DEVELOPMENT_SECRET_KEY_CHANGE_ME` with a strong, randomly generated secret key.
+2. **Restrict CORS origins**: Set `BACKEND_CORS_ORIS` to your specific domain(s) instead of `["*"]`.
+3. **Use environment variables**: Store all sensitive configuration in environment variables or a `.env` file (never commit secrets).
+4. **Enable HTTPS**: Deploy behind a reverse proxy (nginx/Cloudflare) with TLS termination.
+5. **Database security**: Use a dedicated PostgreSQL user with minimal privileges; enable SSL connections.
+6. **Rate limiting**: Implement rate limiting on the authorization check endpoint to prevent abuse.
+7. **Audit log monitoring**: Regularly review audit logs for unusual access patterns.
+8. **Dependency scanning**: Run `safety check` and `bandit` as part of your CI/CD pipeline.
