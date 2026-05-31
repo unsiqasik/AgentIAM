@@ -325,3 +325,21 @@ Please review our [CONTRIBUTING.md](CONTRIBUTING.md) and [DEVELOPMENT.md](DEVELO
 ## 📜 License
 
 AgentIAM is released under the [Apache 2.0 License](LICENSE).
+
+## FAQ
+
+### What is AgentIAM?
+AgentIAM is an Identity and Access Management agent for AI workflows.
+
+### How do I get started?
+```bash
+git clone https://github.com/SHAURYASANYAL3/AgentIAM
+npm install
+npm run dev
+```
+
+### What providers are supported?
+Currently supporting AWS IAM, with GCP and Azure on the roadmap.
+
+### How do I contribute?
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
