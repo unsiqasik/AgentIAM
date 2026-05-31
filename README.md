@@ -241,15 +241,62 @@ The engine responds immediately and logs the interaction:
 
 ---
 
-## 📚 Documentation
+## ❓ Frequently Asked Questions
 
-| Document | Description |
-|----------|-------------|
-| [YAML Policy Schema Reference](docs/POLICY_SCHEMA.md) | Complete reference for defining YAML policies — all fields, wildcards, evaluation logic, examples, and validation rules. |
-| [Architecture](ARCHITECTURE.md) | System architecture and component overview. |
-| [Development Guide](DEVELOPMENT.md) | How to set up a local development environment. |
-| [Contributing](CONTRIBUTING.md) | How to contribute to AgentIAM. |
-| [Security Policy](SECURITY.md) | Security vulnerability reporting guidelines. |
+### General
+
+**Q: What is AgentIAM?**
+A: AgentIAM is an Identity & Access Management system designed specifically for AI agents. It provides centralized authorization, policy enforcement, and audit logging to ensure AI agents only perform actions they are explicitly permitted to do.
+
+**Q: Why do AI agents need IAM?**
+A: AI agents increasingly interact with production systems (databases, APIs, file systems). Without proper access control, a misbehaving agent—or one affected by prompt injection—can cause serious damage. AgentIAM adds a pre-execution authorization layer, similar to how AWS IAM controls human access.
+
+**Q: How does AgentIAM differ from simply removing tools from an agent?**
+A: Removing tools is a blunt approach that limits agent capability. AgentIAM provides fine-grained, policy-based control: you can allow an agent to read a database but not write to it, or permit API calls only to specific endpoints. It also provides audit trails for compliance.
+
+### Installation & Setup
+
+**Q: What are the prerequisites?**
+A: You need Python 3.10+, PostgreSQL, and optionally Docker. The frontend requires Node.js 18+.
+
+**Q: Can I run AgentIAM without Docker?**
+A: Yes. You can run the FastAPI backend directly with `uvicorn` and the frontend with `npm run dev`. See [DEVELOPMENT.md](DEVELOPMENT.md) for local setup instructions.
+
+**Q: How do I configure the database connection?**
+A: Set the `SQLALCHEMY_DATABASE_URI` environment variable (e.g., `postgresql://user:***@localhost:5432/agentiam`). The application uses this to connect to PostgreSQL. You can also configure individual `POSTGRES_SERVER`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` variables.
+
+### Policies & Authorization
+
+**Q: How do I define permissions for an agent?**
+A: Create a YAML policy file that specifies allowed actions, resources, and conditions. Assign the policy to an agent via the dashboard or API.
+
+**Q: Can an agent have multiple policies?**
+A: Not yet. Policy assignment to agents is currently one-to-one. Multi-policy assignment per agent is planned for a future release. The authorization engine evaluates the assigned policy to determine access.
+
+**Q: What happens when an agent tries to perform a denied action?**
+A: The authorization engine returns a DENIED response, and the action is blocked. The event is logged in the immutable audit ledger with full context (agent ID, requested resource, action, decision, reason, and timestamp).
+
+### Security
+
+**Q: Is AgentIAM production-ready?**
+A: AgentIAM is currently an MVP (v0.1). It is suitable for development and testing. For production use, review the security considerations in [DEVELOPMENT.md](DEVELOPMENT.md) and follow the hardening recommendations.
+
+**Q: How are audit logs protected?**
+A: Audit logs are write-once through the API (created during authorization checks via `POST /check-permission`). The API only exposes read endpoints (`GET /` and `GET /{id}`) with no update or delete routes. The audit logger captures every authorization check, regardless of outcome.
+
+**Q: Does AgentIAM support multi-tenancy?**
+A: Not yet. Multi-tenancy support is planned for a future release (see Roadmap). Currently, all agents and policies exist in a single namespace.
+
+### Integration
+
+**Q: Can I use AgentIAM with LangChain or LlamaIndex?**
+A: Integration guides for LangChain and LlamaIndex are planned for v0.3. You can wrap AgentIAM's authorization check around any tool call today using the REST API.
+
+**Q: Does AgentIAM support webhook notifications?**
+A: Not yet. Webhook support for Slack/Discord notifications on denied actions is planned for v0.3.
+
+**Q: What programming languages does the SDK support?**
+A: The API is REST-based and can be called from any language. See the API documentation for request/response formats. Community-contributed SDKs for various languages are welcome.
 
 ---
 
