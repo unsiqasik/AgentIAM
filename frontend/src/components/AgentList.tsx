@@ -18,15 +18,17 @@ export function AgentList({ apiBase = '/api/v1' }: AgentListProps) {
   const [copiedId, setCopiedId] = useState<number | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchAgents = async () => {
       try {
-        const response = await fetch(`${apiBase}/agents/`);
+        const response = await fetch(`${apiBase}/agents/`, { signal: controller.signal });
         if (!response.ok) {
           throw new Error(`Failed to fetch agents: ${response.statusText}`);
         }
         const data = await response.json();
         setAgents(data);
       } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') return;
         setError(err instanceof Error ? err.message : 'Failed to load agents');
       } finally {
         setLoading(false);
@@ -34,6 +36,7 @@ export function AgentList({ apiBase = '/api/v1' }: AgentListProps) {
     };
 
     fetchAgents();
+    return () => controller.abort();
   }, [apiBase]);
 
   const copyToClipboard = useCallback(async (agentId: number) => {
@@ -50,8 +53,11 @@ export function AgentList({ apiBase = '/api/v1' }: AgentListProps) {
       textarea.style.opacity = '0';
       document.body.appendChild(textarea);
       textarea.select();
-      document.execCommand('copy');
+      const copied = document.execCommand('copy');
       document.body.removeChild(textarea);
+      if (!copied) {
+        throw new Error('Clipboard copy failed');
+      }
       setCopiedId(agentId);
       setTimeout(() => setCopiedId(null), 2000);
     }
@@ -85,38 +91,21 @@ export function AgentList({ apiBase = '/api/v1' }: AgentListProps) {
           {agents.map((agent) => (
             <tr key={agent.id}>
               <td className="agent-id-cell">
-                <span className="agent-id" title={String(agent.id)}>
-                  {agent.id}
-                </span>
+                <span className="agent-id">{agent.id}</span>
                 <button
-                  className="copy-button"
+                  className="copy-btn"
                   onClick={() => copyToClipboard(agent.id)}
-                  title={`Copy Agent ID: ${agent.id}`}
-                  aria-label={`Copy Agent ID ${agent.id} to clipboard`}
+                  title="Copy ID"
                 >
-                  {copiedId === agent.id ? (
-                    <span className="copy-success" aria-label="Copied!">
-                      ✓
-                    </span>
-                  ) : (
-                    <span className="copy-icon" aria-label="Copy to clipboard">
-                      📋
-                    </span>
-                  )}
+                  {copiedId === agent.id ? '✓' : '📋'}
                 </button>
-                {copiedId === agent.id && (
-                  <span className="copy-toast">Copied!</span>
-                )}
+                {copiedId === agent.id && <span className="copy-toast">Copied!</span>}
               </td>
               <td className="agent-name-cell">
-                <span className="agent-name" title={agent.name}>
-                  {agent.name}
-                </span>
+                <span className="agent-name">{agent.name}</span>
               </td>
               <td className="agent-desc-cell">
-                <span className="agent-description" title={agent.description ?? ''}>
-                  {agent.description ?? '—'}
-                </span>
+                <span className="agent-description">{agent.description || 'No description'}</span>
               </td>
               <td className="agent-date-cell">
                 {new Date(agent.created_at).toLocaleDateString()}

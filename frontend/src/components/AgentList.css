@@ -93,11 +93,11 @@
   border-radius: 4px;
   font-size: 0.75rem;
   white-space: nowrap;
-  animation: fadeInOut 2s ease-in-out;
+  animation: fade-in-out 2s ease-in-out;
   pointer-events: none;
 }
 
-@keyframes fadeInOut {
+@keyframes fade-in-out {
   0% { opacity: 0; transform: translateY(-50%) translateX(-4px); }
   15% { opacity: 1; transform: translateY(-50%) translateX(0); }
   85% { opacity: 1; transform: translateY(-50%) translateX(0); }
