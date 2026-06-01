@@ -4,8 +4,10 @@ import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
 import { AgentList } from './components/AgentList'
+import { AuditLogsPage } from './pages/AuditLogsPage'
 import './App.css'
 import './components/AgentList.css'
+import './pages/AuditLogsPage.css'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -46,6 +48,12 @@ function App() {
 
       <section id="agents">
         <AgentList />
+      </section>
+
+      <div className="ticks"></div>
+
+      <section id="audit-logs">
+        <AuditLogsPage />
       </section>
 
       <div className="ticks"></div>

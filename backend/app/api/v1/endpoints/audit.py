@@ -15,16 +15,29 @@ def read_audit_logs(
     skip: int = 0,
     limit: int = 100,
     agent_id: Optional[int] = None,
+    resource: Optional[str] = None,
+    action: Optional[str] = None,
+    decision: Optional[bool] = None,
     current_user: Any = Depends(deps.get_current_active_user),
 ) -> Any:
     """
-    Retrieve audit logs.
+    Retrieve audit logs with optional filters.
+
+    Query parameters:
+    - agent_id: Filter by agent ID
+    - resource: Filter by resource name (exact match)
+    - action: Filter by action name (exact match)
+    - decision: Filter by decision (true=ALLOW, false=DENY)
     """
-    if agent_id:
-        return audit_log_repository.get_by_agent(
-            db, agent_id=agent_id, skip=skip, limit=limit
-        )
-    return audit_log_repository.get_multi(db, skip=skip, limit=limit)
+    return audit_log_repository.get_filtered(
+        db,
+        agent_id=agent_id,
+        resource=resource,
+        action=action,
+        decision=decision,
+        skip=skip,
+        limit=limit,
+    )
 
 
 @router.get("/{id}", response_model=AuditLog)
