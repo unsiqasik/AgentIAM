@@ -36,6 +36,7 @@ class AuditLogRepository:
             action=obj_in.action,
             decision=obj_in.decision,
             reason=obj_in.reason,
+            dry_run=obj_in.dry_run,
         )
         db.add(db_obj)
         db.commit()

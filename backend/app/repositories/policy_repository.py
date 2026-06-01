@@ -15,7 +15,11 @@ class PolicyRepository:
         return db.query(Policy).offset(skip).limit(limit).all()
 
     def create(self, db: Session, *, obj_in: PolicyCreate) -> Policy:
-        db_obj = Policy(agent_id=obj_in.agent_id, policy_yaml=obj_in.policy_yaml)
+        db_obj = Policy(
+            agent_id=obj_in.agent_id,
+            policy_yaml=obj_in.policy_yaml,
+            dry_run=obj_in.dry_run,
+        )
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)

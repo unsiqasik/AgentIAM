@@ -9,6 +9,7 @@ class AuditLogBase(BaseModel):
     action: str
     decision: bool
     reason: Optional[str] = None
+    dry_run: bool = False
 
 
 class AuditLogCreate(AuditLogBase):
@@ -32,3 +33,4 @@ class CheckPermissionRequest(BaseModel):
 class CheckPermissionResponse(BaseModel):
     allowed: bool
     reason: str
+    dry_run: bool = False

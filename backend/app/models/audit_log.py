@@ -16,3 +16,6 @@ class AuditLog(Base):
     action: Mapped[str] = mapped_column(String, nullable=False, index=True)
     decision: Mapped[bool] = mapped_column(Boolean, nullable=False)
     reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    dry_run: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default="false", nullable=False
+    )
