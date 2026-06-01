@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from prometheus_fastapi_instrumentator import Instrumentator
 from app.api.v1.api import api_router
 from app.core.config import settings
 
@@ -16,6 +17,17 @@ if settings.BACKEND_CORS_ORIGINS:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+# Add Prometheus metrics
+# Exposes /metrics endpoint with standard HTTP metrics
+# Includes custom business metrics for policy evaluation
+instrumentator = Instrumentator(
+    should_group_status_codes=False,
+    should_ignore_untemplated=True,
+    excluded_handlers=["/metrics"],
+)
+instrumentator.instrument(app)
+instrumentator.expose(app, endpoint="/metrics")
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
