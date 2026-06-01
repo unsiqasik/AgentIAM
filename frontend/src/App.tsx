@@ -4,8 +4,10 @@ import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
 import { AgentList } from './components/AgentList'
+import { AuditCharts } from './components/AuditCharts'
 import './App.css'
 import './components/AgentList.css'
+import './components/AuditCharts.css'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -40,6 +42,12 @@ function App() {
         >
           Count is {count}
         </button>
+      </section>
+
+      <div className="ticks"></div>
+
+      <section id="audit-dashboard">
+        <AuditCharts />
       </section>
 
       <div className="ticks"></div>
