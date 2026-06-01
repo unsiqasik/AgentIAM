@@ -2,6 +2,7 @@ from typing import Any, List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.api import deps
+from app.services.policy_version_service import policy_version_service
 from app.repositories.policy_repository import policy_repository
 from app.services.policy_service import policy_service
 from app.schemas.policy import Policy, PolicyCreate, PolicyUpdate
