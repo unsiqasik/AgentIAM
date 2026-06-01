@@ -24,3 +24,5 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
+    mfa_enabled: Mapped[bool] = mapped_column(default=False, nullable=False)
+    mfa_secret: Mapped[str] = mapped_column(String, nullable=True)
