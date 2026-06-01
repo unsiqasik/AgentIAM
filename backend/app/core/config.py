@@ -23,6 +23,10 @@ class Settings(BaseSettings):
 
     BACKEND_CORS_ORIGINS: List[str] = ["*"]
 
+    # Rate limiting configuration
+    RATE_LIMIT_REQUESTS: int = 100  # Max requests per window
+    RATE_LIMIT_WINDOW_SECONDS: int = 60  # Window duration in seconds
+
     class Config:
         case_sensitive = True
         env_file = ".env"

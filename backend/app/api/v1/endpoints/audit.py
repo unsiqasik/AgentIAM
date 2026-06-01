@@ -1,10 +1,11 @@
 from typing import Any, List, Optional
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from app.api import deps
 from app.repositories.audit_log_repository import audit_log_repository
 from app.services.authz_service import authz_service
 from app.schemas.audit import AuditLog, CheckPermissionRequest, CheckPermissionResponse
+from app.core.rate_limiter import check_rate_limit
 
 router = APIRouter()
 
@@ -42,19 +43,44 @@ def read_audit_log_by_id(
     return audit_log
 
 
-@router.post("/check-permission", response_model=CheckPermissionResponse)
+@router.post(
+    "/check-permission",
+    response_model=CheckPermissionResponse,
+    dependencies=[Depends(check_rate_limit)],
+)
 def check_permission(
     *,
+    fastapi_request: Request,
     db: Session = Depends(deps.get_db),
-    request: CheckPermissionRequest,
+    request_body: CheckPermissionRequest,
 ) -> Any:
     """
     Check if an agent is allowed to perform an action on a resource.
-    Note: This endpoint can be used by Agents directly or through a gateway.
-    It does not require JWT auth but could be secured with API Keys in the future.
-    For MVP, we allow open access for demonstration.
+    Rate-limited to prevent brute-force probing.
+
+    Rate limit headers are included in the response:
+    - X-RateLimit-Limit: Max requests per window
+    - X-RateLimit-Remaining: Requests remaining in current window
+    - X-RateLimit-Reset: Unix timestamp when the window resets
+
+    Returns 429 Too Many Requests when the rate limit is exceeded.
     """
     allowed, reason = authz_service.check_permission(
-        db, agent_id=request.agent_id, resource=request.resource, action=request.action
+        db,
+        agent_id=request_body.agent_id,
+        resource=request_body.resource,
+        action=request_body.action,
     )
-    return CheckPermissionResponse(allowed=allowed, reason=reason)
+
+    response = CheckPermissionResponse(allowed=allowed, reason=reason)
+
+    # Add rate limit headers to response if available
+    if hasattr(fastapi_request.state, "rate_limit_headers"):
+        from fastapi.responses import JSONResponse
+
+        return JSONResponse(
+            content=response.model_dump(),
+            headers=fastapi_request.state.rate_limit_headers,
+        )
+
+    return response
