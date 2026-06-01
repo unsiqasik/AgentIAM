@@ -19,11 +19,11 @@ class AuditLog(AuditLogBase):
     id: int
     timestamp: datetime
 
-    @field_serializer('timestamp')
+    @field_serializer("timestamp")
     @staticmethod
     def serialize_timestamp(value: datetime) -> str:
         """Serialize datetime with full microsecond precision in ISO 8601 format."""
-        return value.isoformat(timespec='microseconds')
+        return value.isoformat(timespec="microseconds")
 
     class Config:
         from_attributes = True
