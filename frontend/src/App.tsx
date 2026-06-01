@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ThemeToggle } from './components/ThemeToggle'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
@@ -9,6 +10,15 @@ function App() {
 
   return (
     <>
+      <header className="app-header">
+        <div className="header-left">
+          <span className="logo-text">AgentIAM</span>
+        </div>
+        <div className="header-right">
+          <ThemeToggle />
+        </div>
+      </header>
+
       <section id="center">
         <div className="hero">
           <img src={heroImg} className="base" width="170" height="179" alt="" />
