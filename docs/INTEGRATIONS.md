@@ -81,7 +81,9 @@ def check_permission(agent_id: int, resource: str, action: str) -> bool:
             "resource": resource,
             "action": action,
         },
+        timeout=10.0,
     )
+    response.raise_for_status()
     result = response.json()
 
     if not result["allowed"]:
@@ -222,18 +224,30 @@ export async function checkPermission(
   resource: string,
   action: string
 ): Promise<boolean> {
-  const response = await axios.post(
-    `${AGENTIAM_URL}/api/v1/audit/check-permission`,
-    { agent_id: agentId, resource, action }
-  );
-
-  if (!response.data.allowed) {
-    throw new PermissionDeniedError(
-      `Agent ${agentId} denied: ${action} on ${resource}. ` +
-      `Reason: ${response.data.reason}`
+  try {
+    const response = await axios.post(
+      `${AGENTIAM_URL}/api/v1/audit/check-permission`,
+      { agent_id: agentId, resource, action },
+      { timeout: 10000 }
     );
+
+    if (!response.data.allowed) {
+      throw new PermissionDeniedError(
+        `Agent ${agentId} denied: ${action} on ${resource}. ` +
+        `Reason: ${response.data.reason}`
+      );
+    }
+    return true;
+  } catch (error) {
+    if (error instanceof PermissionDeniedError) throw error;
+    if (axios.isAxiosError(error)) {
+      throw new PermissionDeniedError(
+        `AgentIAM check failed: ${error.message}. ` +
+        `Ensure the backend is running at ${AGENTIAM_URL}.`
+      );
+    }
+    throw error;
   }
-  return true;
 }
 ```
 
@@ -344,8 +358,7 @@ permissions:
 
 ```yaml
 permissions:
-  "*":
-    "*": true
+  "*": true
 ```
 
 ### Mixed Permissions
@@ -398,7 +411,7 @@ curl http://localhost:8000/api/v1/agents/
 ```bash
 curl -X POST http://localhost:8000/api/v1/policies/ \
   -H "Content-Type: application/json" \
-  -d '{"agent_id": 1, "policy_yaml": "permissions:\n  \"*\":\n    \"*\": true"}'
+  -d '{"agent_id": 1, "policy_yaml": "permissions:\n  \"*\": true"}'
 ```
 
 ### Timeout Errors
