@@ -6,6 +6,7 @@ from pydantic import BaseModel
 class PolicyBase(BaseModel):
     agent_id: int
     policy_yaml: str
+    expires_at: Optional[datetime] = None
 
 
 class PolicyCreate(PolicyBase):
@@ -14,6 +15,7 @@ class PolicyCreate(PolicyBase):
 
 class PolicyUpdate(BaseModel):
     policy_yaml: Optional[str] = None
+    expires_at: Optional[datetime] = None
 
 
 class PolicyInDBBase(PolicyBase):

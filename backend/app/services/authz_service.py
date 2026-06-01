@@ -1,4 +1,5 @@
 import yaml
+from datetime import datetime, timezone
 from typing import Tuple
 from sqlalchemy.orm import Session
 from app.repositories.policy_repository import policy_repository
@@ -18,6 +19,10 @@ class AuthzService:
 
         if not policy_obj:
             reason = "No policy found for this agent"
+        elif policy_obj.expires_at and policy_obj.expires_at < datetime.now(timezone.utc):
+            # Policy has expired
+            decision = False
+            reason = "Policy has expired"
         else:
             try:
                 policy_data = yaml.safe_load(policy_obj.policy_yaml)
