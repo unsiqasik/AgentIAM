@@ -8,6 +8,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ALGORITHM = "HS256"
 
+
 class PasswordValidationError(Exception):
     """Raised when a password does not meet complexity requirements."""
 
@@ -34,13 +35,10 @@ def validate_password(password: str) -> None:
         errors.append("at least one lowercase letter")
     if not any(c.isdigit() for c in password):
         errors.append("at least one digit")
-    if not any(c in '!@#$%^&*()_+-=[]{}|;\':".,/<>?~`' for c in password):
+    if not any(c in "!@#$%^&*()_+-=[]{}|;':\".,/<>?~`" for c in password):
         errors.append("at least one special character (!@#$%^&* etc.)")
     if errors:
-        raise PasswordValidationError(
-            f"Password must contain {', '.join(errors)}."
-        )
-
+        raise PasswordValidationError(f"Password must contain {', '.join(errors)}.")
 
 
 def create_access_token(
