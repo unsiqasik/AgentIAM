@@ -16,3 +16,7 @@ class AuditLog(Base):
     action: Mapped[str] = mapped_column(String, nullable=False, index=True)
     decision: Mapped[bool] = mapped_column(Boolean, nullable=False)
     reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    
+    # Integrity fields for hash chain
+    previous_hash: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    entry_hash: Mapped[str] = mapped_column(String(64), nullable=False)
