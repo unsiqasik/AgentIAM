@@ -91,5 +91,6 @@ def test_audit_log_timestamp_precision(client: TestClient, admin_token_headers: 
     for log in logs:
         timestamp = log["timestamp"]
         assert "T" in timestamp, "Timestamp should be ISO 8601 format"
-        assert re.search(pattern, timestamp), 
+        assert re.search(pattern, timestamp), (
             f"Timestamp should include 6-digit microsecond precision: {timestamp}"
+        )

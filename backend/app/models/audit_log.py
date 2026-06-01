@@ -9,7 +9,7 @@ from app.db.base_class import Base
 class AuditLog(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     timestamp: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True, precision=6), server_default=func.now()
+        DateTime(timezone=True), server_default=func.now()
     )
     agent_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
     resource: Mapped[str] = mapped_column(String, nullable=False, index=True)
