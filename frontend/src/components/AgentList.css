@@ -1,0 +1,153 @@
+.agent-list {
+  padding: 20px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.agent-list h2 {
+  margin-bottom: 16px;
+  font-size: 1.5rem;
+  color: #1a1a2e;
+}
+
+.agent-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.agent-table th,
+.agent-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.agent-table th {
+  background: #f5f5f5;
+  font-weight: 600;
+  color: #333;
+}
+
+.agent-table tr:hover {
+  background: #f9f9ff;
+}
+
+/* Agent ID cell with copy button */
+.agent-id-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.agent-id {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.copy-button {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 2px 6px;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+}
+
+.copy-button:hover {
+  background: #f0f0f0;
+  border-color: #bbb;
+}
+
+.copy-button:focus-visible {
+  outline: 2px solid #4a90d9;
+  outline-offset: 2px;
+}
+
+.copy-success {
+  color: #22c55e;
+  font-weight: bold;
+}
+
+.copy-icon {
+  font-size: 0.8rem;
+}
+
+.copy-toast {
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 8px;
+  background: #22c55e;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  animation: fade-in-out 2s ease-in-out;
+  pointer-events: none;
+}
+
+@keyframes fade-in-out {
+  0% { opacity: 0; transform: translateY(-50%) translateX(-4px); }
+  15% { opacity: 1; transform: translateY(-50%) translateX(0); }
+  85% { opacity: 1; transform: translateY(-50%) translateX(0); }
+  100% { opacity: 0; transform: translateY(-50%) translateX(4px); }
+}
+
+/* Agent name — prevent overflow on long names (Issue #19) */
+.agent-name-cell {
+  max-width: 200px;
+}
+
+.agent-name {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+  color: #1a1a2e;
+}
+
+/* Description — prevent overflow */
+.agent-desc-cell {
+  max-width: 300px;
+}
+
+.agent-description {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #666;
+}
+
+/* Date cell */
+.agent-date-cell {
+  white-space: nowrap;
+  color: #888;
+  font-size: 0.85rem;
+}
+
+/* Loading / Error / Empty states */
+.agent-list-loading,
+.agent-list-error,
+.agent-list-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: #666;
+  font-size: 1rem;
+}
+
+.agent-list-error {
+  color: #dc2626;
+}
