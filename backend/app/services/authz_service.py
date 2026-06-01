@@ -1,9 +1,12 @@
+import logging
 import yaml
 from typing import Tuple
 from sqlalchemy.orm import Session
 from app.repositories.policy_repository import policy_repository
 from app.repositories.audit_log_repository import audit_log_repository
 from app.schemas.audit import AuditLogCreate
+
+logger = logging.getLogger(__name__)
 
 
 class AuthzService:
@@ -51,6 +54,15 @@ class AuthzService:
             except Exception as e:
                 decision = False
                 reason = f"Error evaluating policy: {str(e)}"
+                logger.error(
+                    "policy evaluation failed",
+                    extra={
+                        "agent_id": agent_id,
+                        "resource": resource,
+                        "action": action,
+                        "error": str(e),
+                    },
+                )
 
         # 2. Log decision to audit trail
         audit_in = AuditLogCreate(
@@ -61,6 +73,17 @@ class AuthzService:
             reason=reason,
         )
         audit_log_repository.create(db, obj_in=audit_in)
+
+        logger.info(
+            "permission check",
+            extra={
+                "agent_id": agent_id,
+                "resource": resource,
+                "action": action,
+                "decision": "allow" if decision else "deny",
+                "reason": reason,
+            },
+        )
 
         return decision, reason
 
