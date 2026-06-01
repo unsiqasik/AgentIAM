@@ -1,5 +1,9 @@
 import pytest
-from app.services.policy_service import PolicyService, MAX_YAML_NESTING_DEPTH, MAX_YAML_KEYS
+from app.services.policy_service import (
+    PolicyService,
+    MAX_YAML_NESTING_DEPTH,
+    MAX_YAML_KEYS,
+)
 
 
 @pytest.fixture

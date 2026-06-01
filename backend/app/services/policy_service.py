@@ -13,6 +13,7 @@ MAX_YAML_STRING_LENGTH = 1000
 
 class SafeYAMLLoader(yaml.SafeLoader):
     """Custom YAML loader with resource limits to prevent DoS attacks."""
+
     pass
 
 
@@ -53,7 +54,9 @@ SafeYAMLLoader.add_constructor(
 )
 
 
-def _check_nesting_depth(data: Any, max_depth: int = MAX_YAML_NESTING_DEPTH, current_depth: int = 0) -> None:
+def _check_nesting_depth(
+    data: Any, max_depth: int = MAX_YAML_NESTING_DEPTH, current_depth: int = 0
+) -> None:
     """Recursively check YAML nesting depth to prevent Billion Laughs-style attacks."""
     if current_depth > max_depth:
         raise ValueError(
@@ -73,7 +76,9 @@ class PolicyService:
     def validate_yaml(self, policy_yaml: str) -> Dict[str, Any]:
         try:
             # Use custom SafeLoader with resource limits
-            data = yaml.load(policy_yaml, Loader=SafeYAMLLoader)
+            data = yaml.load(  # nosec B506 - SafeYAMLLoader extends SafeLoader with resource limits
+                policy_yaml, Loader=SafeYAMLLoader
+            )
 
             if not isinstance(data, dict):
                 raise ValueError("Policy must be a YAML object")
