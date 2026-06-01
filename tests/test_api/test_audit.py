@@ -85,8 +85,11 @@ def test_audit_log_timestamp_precision(client: TestClient, admin_token_headers: 
     logs = response.json()
     assert len(logs) > 0
 
-    # Check that timestamps include microsecond precision (contains '.' before timezone)
+    # Check that timestamps include microsecond precision
+    import re
+    pattern = r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}"
     for log in logs:
         timestamp = log["timestamp"]
         assert "T" in timestamp, "Timestamp should be ISO 8601 format"
-        assert "." in timestamp, "Timestamp should include microsecond precision (decimal point)"
+        assert re.search(pattern, timestamp), 
+            f"Timestamp should include 6-digit microsecond precision: {timestamp}"
