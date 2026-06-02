@@ -5,8 +5,10 @@ import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
 import { AgentList } from './components/AgentList'
+import { AuditCharts } from './components/AuditCharts'
 import './App.css'
 import './components/AgentList.css'
+import './components/AuditCharts.css'
 
 function App() {
   const [activeTab, setActiveTab] = useState<'agents' | 'policy'>('agents')
