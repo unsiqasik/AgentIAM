@@ -30,14 +30,19 @@ class AuthzService:
         else:
             try:
                 policy_data = yaml.safe_load(policy_obj.policy_yaml)
-                
+
                 # Check for IP restrictions first
                 if "ip_restrictions" in policy_data:
-                    allowed_cidrs = policy_data["ip_restrictions"].get("allowed_cidrs", [])
+                    allowed_cidrs = policy_data["ip_restrictions"].get(
+                        "allowed_cidrs", []
+                    )
                     if allowed_cidrs:
                         if not ip_address:
-                            return False, "IP address is required by policy but not provided"
-                        
+                            return (
+                                False,
+                                "IP address is required by policy but not provided",
+                            )
+
                         try:
                             request_ip = ipaddress.ip_address(ip_address)
                             ip_allowed = False
@@ -45,9 +50,12 @@ class AuthzService:
                                 if request_ip in ipaddress.ip_network(cidr):
                                     ip_allowed = True
                                     break
-                            
+
                             if not ip_allowed:
-                                return False, f"IP address {ip_address} is not allowed by policy"
+                                return (
+                                    False,
+                                    f"IP address {ip_address} is not allowed by policy",
+                                )
                         except ValueError as e:
                             return False, f"Invalid IP address or CIDR: {str(e)}"
 
