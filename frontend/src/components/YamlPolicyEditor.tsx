@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import './YamlPolicyEditor.css';
 import Editor from '@monaco-editor/react';
 
@@ -79,29 +79,18 @@ export const YamlPolicyEditor: React.FC<YamlPolicyEditorProps> = ({
   height = '400px'
 }) => {
   const [value, setValue] = useState(initialValue);
-  const [isValid, setIsValid] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showSamples, setShowSamples] = useState(false);
 
-  // Validate YAML on change
-  useEffect(() => {
-    validateYaml(value);
-  }, [value]);
-
-  const validateYaml = useCallback((yaml: string) => {
+  const getValidationResult = useCallback((yaml: string) => {
     try {
       // Basic YAML validation
       if (!yaml.trim()) {
-        setIsValid(false);
-        setErrorMessage('Policy cannot be empty');
-        return;
+        return { isValid: false, errorMessage: 'Policy cannot be empty' };
       }
 
       // Check for required permissions key
       if (!yaml.includes('permissions:')) {
-        setIsValid(false);
-        setErrorMessage('Policy must contain "permissions" key');
-        return;
+        return { isValid: false, errorMessage: 'Policy must contain "permissions" key' };
       }
 
       // Check for valid YAML structure
@@ -128,23 +117,24 @@ export const YamlPolicyEditor: React.FC<YamlPolicyEditorProps> = ({
       }
 
       if (!hasPermissions) {
-        setIsValid(false);
-        setErrorMessage('Policy must contain "permissions" section');
-        return;
+        return { isValid: false, errorMessage: 'Policy must contain "permissions" section' };
       }
 
-      setIsValid(true);
-      setErrorMessage(null);
+      return { isValid: true, errorMessage: null };
     } catch (error) {
-      setIsValid(false);
-      setErrorMessage(`Invalid YAML: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      return { 
+        isValid: false, 
+        errorMessage: `Invalid YAML: ${error instanceof Error ? error.message : 'Unknown error'}` 
+      };
     }
   }, []);
 
-  const handleEditorChange = useCallback((value: string | undefined) => {
-    if (value !== undefined) {
-      setValue(value);
-      onChange?.(value);
+  const { isValid, errorMessage } = getValidationResult(value);
+
+  const handleEditorChange = useCallback((newValue: string | undefined) => {
+    if (newValue !== undefined) {
+      setValue(newValue);
+      onChange?.(newValue);
     }
   }, [onChange]);
 

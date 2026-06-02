@@ -1,9 +1,6 @@
 import { useState } from 'react'
 import { ThemeToggle } from './components/ThemeToggle'
 import { YamlPolicyEditor } from './components/YamlPolicyEditor'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
 import { AgentList } from './components/AgentList'
 import { AuditCharts } from './components/AuditCharts'
 import './App.css'
@@ -11,7 +8,7 @@ import './components/AgentList.css'
 import './components/AuditCharts.css'
 
 function App() {
-  const [activeTab, setActiveTab] = useState<'agents' | 'policy'>('agents')
+  const [activeTab, setActiveTab] = useState<'agents' | 'policy' | 'audit'>('agents')
   const [savedPolicy, setSavedPolicy] = useState<string | null>(null)
 
   const handleSavePolicy = (policy: string) => {
@@ -44,12 +41,24 @@ function App() {
           >
             Policy Editor
           </button>
+          <button
+            className={`tab-button ${activeTab === 'audit' ? 'active' : ''}`}
+            onClick={() => setActiveTab('audit')}
+          >
+            Audit Dashboard
+          </button>
         </nav>
 
         <div className="tab-content">
           {activeTab === 'agents' && (
             <section className="agents-section">
               <AgentList />
+            </section>
+          )}
+
+          {activeTab === 'audit' && (
+            <section className="audit-section">
+              <AuditCharts apiBaseUrl="/api/v1" />
             </section>
           )}
 
