@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ThemeToggle } from './components/ThemeToggle'
+import { YamlPolicyEditor } from './components/YamlPolicyEditor'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
@@ -8,7 +9,13 @@ import './App.css'
 import './components/AgentList.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [activeTab, setActiveTab] = useState<'agents' | 'policy'>('agents')
+  const [savedPolicy, setSavedPolicy] = useState<string | null>(null)
+
+  const handleSavePolicy = (policy: string) => {
+    setSavedPolicy(policy)
+    console.log('Policy saved:', policy)
+  }
 
   return (
     <>
@@ -21,102 +28,139 @@ function App() {
         </div>
       </header>
 
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+      <main className="app-main">
+        <nav className="tab-navigation">
+          <button
+            className={`tab-button ${activeTab === 'agents' ? 'active' : ''}`}
+            onClick={() => setActiveTab('agents')}
+          >
+            Agents
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'policy' ? 'active' : ''}`}
+            onClick={() => setActiveTab('policy')}
+          >
+            Policy Editor
+          </button>
+        </nav>
+
+        <div className="tab-content">
+          {activeTab === 'agents' && (
+            <section className="agents-section">
+              <AgentList />
+            </section>
+          )}
+
+          {activeTab === 'policy' && (
+            <section className="policy-section">
+              <div className="policy-header">
+                <h2>Policy Editor</h2>
+                <p>Create and edit YAML policies for your agents</p>
+              </div>
+              
+              <YamlPolicyEditor
+                onSave={handleSavePolicy}
+                height="500px"
+              />
+
+              {savedPolicy && (
+                <div className="saved-policy-preview">
+                  <h3>Last Saved Policy</h3>
+                  <pre>{savedPolicy}</pre>
+                </div>
+              )}
+            </section>
+          )}
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+      </main>
 
-      <div className="ticks"></div>
+      <style>{`
+        .app-main {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 24px;
+        }
 
-      <section id="agents">
-        <AgentList />
-      </section>
+        .tab-navigation {
+          display: flex;
+          gap: 8px;
+          margin-bottom: 24px;
+          border-bottom: 1px solid #333;
+          padding-bottom: 16px;
+        }
 
-      <div className="ticks"></div>
+        .tab-button {
+          padding: 12px 24px;
+          background: #333;
+          border: none;
+          border-radius: 6px;
+          color: #fff;
+          cursor: pointer;
+          font-size: 16px;
+          transition: all 0.2s;
+        }
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank" rel="noopener noreferrer">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank" rel="noopener noreferrer">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank" rel="noopener noreferrer">
-                <svg className="button-icon" role="presentation" aria-hidden="true">
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank" rel="noopener noreferrer">
-                <svg className="button-icon" role="presentation" aria-hidden="true">
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank" rel="noopener noreferrer">
-                <svg className="button-icon" role="presentation" aria-hidden="true">
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank" rel="noopener noreferrer">
-                <svg className="button-icon" role="presentation" aria-hidden="true">
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+        .tab-button:hover {
+          background: #444;
+        }
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
+        .tab-button.active {
+          background: #2563eb;
+        }
+
+        .tab-content {
+          min-height: 60vh;
+        }
+
+        .agents-section, .policy-section {
+          animation: fadeIn 0.3s ease-in;
+        }
+
+        .policy-header {
+          margin-bottom: 24px;
+        }
+
+        .policy-header h2 {
+          margin: 0 0 8px 0;
+          font-size: 24px;
+          color: #fff;
+        }
+
+        .policy-header p {
+          margin: 0;
+          color: #888;
+          font-size: 16px;
+        }
+
+        .saved-policy-preview {
+          margin-top: 24px;
+          padding: 20px;
+          background: #252526;
+          border-radius: 8px;
+          border: 1px solid #333;
+        }
+
+        .saved-policy-preview h3 {
+          margin: 0 0 12px 0;
+          font-size: 18px;
+          color: #fff;
+        }
+
+        .saved-policy-preview pre {
+          background: #1e1e1e;
+          padding: 16px;
+          border-radius: 4px;
+          font-family: monospace;
+          font-size: 14px;
+          line-height: 1.5;
+          overflow-x: auto;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </>
   )
 }
