@@ -1,9 +1,10 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import './YamlPolicyEditor.css';
 import Editor from '@monaco-editor/react';
 
 interface YamlPolicyEditorProps {
-  initialValue?: string;
+  agentId?: number;
+  apiBase?: string;
   onChange?: (value: string) => void;
   onSave?: (value: string) => void;
   readOnly?: boolean;
@@ -72,28 +73,57 @@ const SAMPLE_POLICIES = [
 ];
 
 export const YamlPolicyEditor: React.FC<YamlPolicyEditorProps> = ({
-  initialValue = DEFAULT_POLICY,
+  agentId,
+  apiBase = '/api/v1',
   onChange,
   onSave,
   readOnly = false,
   height = '400px'
 }) => {
-  const [value, setValue] = useState(initialValue);
+  const [value, setValue] = useState(DEFAULT_POLICY);
   const [showSamples, setShowSamples] = useState(false);
+  const [loading, setLoading] = useState(!!agentId);
+  const [error, setError] = useState<string | null>(null);
+  const [policyId, setPolicyId] = useState<number | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (!agentId) return;
+
+    const fetchPolicy = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(`${apiBase}/policies/agent/${agentId}`);
+        if (response.ok) {
+          const data = await response.json();
+          setValue(data.policy_yaml);
+          setPolicyId(data.id);
+        } else if (response.status === 404) {
+          setValue(DEFAULT_POLICY);
+          setPolicyId(null);
+        } else {
+          throw new Error('Failed to fetch policy');
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Error loading policy');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPolicy();
+  }, [agentId, apiBase]);
 
   const getValidationResult = useCallback((yaml: string) => {
     try {
-      // Basic YAML validation
       if (!yaml.trim()) {
         return { isValid: false, errorMessage: 'Policy cannot be empty' };
       }
-
-      // Check for required permissions key
       if (!yaml.includes('permissions:')) {
         return { isValid: false, errorMessage: 'Policy must contain "permissions" key' };
       }
 
-      // Check for valid YAML structure
       const lines = yaml.split('\n');
       let hasPermissions = false;
       let indentLevel = 0;
@@ -138,11 +168,50 @@ export const YamlPolicyEditor: React.FC<YamlPolicyEditorProps> = ({
     }
   }, [onChange]);
 
-  const handleSave = useCallback(() => {
-    if (isValid && onSave) {
-      onSave(value);
+  const handleSave = useCallback(async () => {
+    if (!isValid) return;
+
+    if (!agentId) {
+      onSave?.(value);
+      alert('Policy "saved" locally (standalone mode)');
+      return;
     }
-  }, [isValid, onSave, value]);
+
+    setIsSaving(true);
+    try {
+      let response;
+      if (policyId) {
+        response = await fetch(`${apiBase}/policies/${policyId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ policy_yaml: value }),
+        });
+      } else {
+        response = await fetch(`${apiBase}/policies/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            agent_id: agentId,
+            policy_yaml: value,
+          }),
+        });
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to save policy');
+      }
+
+      const savedData = await response.json();
+      setPolicyId(savedData.id);
+      onSave?.(value);
+      alert('Policy saved successfully!');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Error saving policy');
+    } finally {
+      setIsSaving(false);
+    }
+  }, [isValid, policyId, apiBase, agentId, value, onSave]);
 
   const handleSampleSelect = useCallback((sample: typeof SAMPLE_POLICIES[0]) => {
     setValue(sample.yaml);
@@ -150,12 +219,13 @@ export const YamlPolicyEditor: React.FC<YamlPolicyEditorProps> = ({
     setShowSamples(false);
   }, [onChange]);
 
+  if (loading) return <div className="editor-loading">Loading policy...</div>;
+
   return (
     <div className="yaml-policy-editor">
-      {/* Header */}
       <div className="editor-header">
         <div className="editor-title">
-          <h3>Policy Editor</h3>
+          <h3>Policy Editor {agentId ? `for Agent #${agentId}` : '(Standalone)'}</h3>
           <span className={`validation-status ${isValid ? 'valid' : 'invalid'}`}>
             {isValid ? '✓ Valid' : '✗ Invalid'}
           </span>
@@ -169,26 +239,30 @@ export const YamlPolicyEditor: React.FC<YamlPolicyEditorProps> = ({
             Sample Policies
           </button>
           
-          {!readOnly && onSave && (
+          {!readOnly && (
             <button
               className="save-button"
               onClick={handleSave}
-              disabled={!isValid}
+              disabled={!isValid || isSaving}
             >
-              Save Policy
+              {isSaving ? 'Saving...' : 'Save Policy'}
             </button>
           )}
         </div>
       </div>
 
-      {/* Error Message */}
+      {error && (
+        <div className="error-message">
+          Error: {error}
+        </div>
+      )}
+
       {errorMessage && (
         <div className="error-message">
           {errorMessage}
         </div>
       )}
 
-      {/* Sample Policies Dropdown */}
       {showSamples && (
         <div className="samples-dropdown">
           <h4>Sample Policies</h4>
@@ -204,7 +278,6 @@ export const YamlPolicyEditor: React.FC<YamlPolicyEditorProps> = ({
         </div>
       )}
 
-      {/* Monaco Editor */}
       <div className="editor-container">
         <Editor
           height={height}
@@ -233,7 +306,6 @@ export const YamlPolicyEditor: React.FC<YamlPolicyEditorProps> = ({
         />
       </div>
 
-      {/* Help Text */}
       <div className="editor-help">
         <p>
           <strong>YAML Policy Format:</strong> Define permissions using the <code>permissions</code> key.
@@ -241,8 +313,6 @@ export const YamlPolicyEditor: React.FC<YamlPolicyEditorProps> = ({
           Use <code>"*": true</code> for wildcard access to all resources.
         </p>
       </div>
-
-      
     </div>
   );
 };

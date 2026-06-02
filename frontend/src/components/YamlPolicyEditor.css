@@ -5,6 +5,15 @@
   background: #1e1e1e;
 }
 
+.editor-loading {
+  padding: 60px;
+  text-align: center;
+  color: #888;
+  background: #1e1e1e;
+  border-radius: 8px;
+  border: 1px solid #333;
+}
+
 .editor-header {
   display: flex;
   justify-content: space-between;

@@ -3,17 +3,19 @@ import { ThemeToggle } from './components/ThemeToggle'
 import { YamlPolicyEditor } from './components/YamlPolicyEditor'
 import { AgentList } from './components/AgentList'
 import { AuditCharts } from './components/AuditCharts'
+import { AuditLogList } from './components/AuditLogList'
 import './App.css'
 import './components/AgentList.css'
 import './components/AuditCharts.css'
+import './components/AuditLogList.css'
 
 function App() {
   const [activeTab, setActiveTab] = useState<'agents' | 'policy' | 'audit'>('agents')
-  const [savedPolicy, setSavedPolicy] = useState<string | null>(null)
+  const [selectedAgentId, setSelectedAgentId] = useState<number | null>(null)
 
-  const handleSavePolicy = (policy: string) => {
-    setSavedPolicy(policy)
-    console.log('Policy saved:', policy)
+  const handleSelectAgent = (id: number) => {
+    setSelectedAgentId(id)
+    setActiveTab('policy')
   }
 
   return (
@@ -39,46 +41,51 @@ function App() {
             className={`tab-button ${activeTab === 'policy' ? 'active' : ''}`}
             onClick={() => setActiveTab('policy')}
           >
-            Policy Editor
+            Policy Editor {selectedAgentId ? `(#${selectedAgentId})` : ''}
           </button>
           <button
             className={`tab-button ${activeTab === 'audit' ? 'active' : ''}`}
             onClick={() => setActiveTab('audit')}
           >
-            Audit Dashboard
+            Audit & Analytics
           </button>
         </nav>
 
         <div className="tab-content">
           {activeTab === 'agents' && (
             <section className="agents-section">
-              <AgentList />
+              <AgentList onSelectAgent={handleSelectAgent} />
             </section>
           )}
 
           {activeTab === 'audit' && (
             <section className="audit-section">
-              <AuditCharts apiBaseUrl="/api/v1" />
+              <div className="audit-grid">
+                <AuditCharts apiBaseUrl="/api/v1" />
+                <AuditLogList apiBase="/api/v1" />
+              </div>
             </section>
           )}
 
           {activeTab === 'policy' && (
             <section className="policy-section">
-              <div className="policy-header">
-                <h2>Policy Editor</h2>
-                <p>Create and edit YAML policies for your agents</p>
-              </div>
-              
-              <YamlPolicyEditor
-                onSave={handleSavePolicy}
-                height="500px"
-              />
-
-              {savedPolicy && (
-                <div className="saved-policy-preview">
-                  <h3>Last Saved Policy</h3>
-                  <pre>{savedPolicy}</pre>
+              {!selectedAgentId ? (
+                <div className="no-agent-selected">
+                  <p>Please select an agent from the list to edit its policy.</p>
+                  <button onClick={() => setActiveTab('agents')}>Go to Agent List</button>
                 </div>
+              ) : (
+                <>
+                  <div className="policy-header">
+                    <h2>Policy Editor for Agent #{selectedAgentId}</h2>
+                    <p>Define what this agent can and cannot do.</p>
+                  </div>
+                  
+                  <YamlPolicyEditor
+                    agentId={selectedAgentId}
+                    height="500px"
+                  />
+                </>
               )}
             </section>
           )}
@@ -87,7 +94,7 @@ function App() {
 
       <style>{`
         .app-main {
-          max-width: 1200px;
+          max-width: 1400px;
           margin: 0 auto;
           padding: 24px;
         }
@@ -96,34 +103,60 @@ function App() {
           display: flex;
           gap: 8px;
           margin-bottom: 24px;
-          border-bottom: 1px solid #333;
+          border-bottom: 1px solid var(--border);
           padding-bottom: 16px;
         }
 
         .tab-button {
           padding: 12px 24px;
-          background: #333;
-          border: none;
+          background: var(--code-bg);
+          border: 1px solid var(--border);
           border-radius: 6px;
-          color: #fff;
+          color: var(--text);
           cursor: pointer;
           font-size: 16px;
           transition: all 0.2s;
         }
 
         .tab-button:hover {
-          background: #444;
+          background: var(--border);
         }
 
         .tab-button.active {
           background: #2563eb;
+          color: white;
+          border-color: #2563eb;
         }
 
         .tab-content {
           min-height: 60vh;
         }
 
-        .agents-section, .policy-section {
+        .audit-grid {
+          display: flex;
+          flex-direction: column;
+          gap: 32px;
+        }
+
+        .no-agent-selected {
+          text-align: center;
+          padding: 60px;
+          background: var(--code-bg);
+          border-radius: 12px;
+          border: 1px dashed var(--border);
+        }
+
+        .no-agent-selected button {
+          margin-top: 16px;
+          padding: 10px 20px;
+          background: #2563eb;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+        }
+
+        .agents-section, .policy-section, .audit-section {
           animation: fadeIn 0.3s ease-in;
         }
 
@@ -134,37 +167,13 @@ function App() {
         .policy-header h2 {
           margin: 0 0 8px 0;
           font-size: 24px;
-          color: #fff;
+          color: var(--text-h);
         }
 
         .policy-header p {
           margin: 0;
-          color: #888;
+          color: var(--text);
           font-size: 16px;
-        }
-
-        .saved-policy-preview {
-          margin-top: 24px;
-          padding: 20px;
-          background: #252526;
-          border-radius: 8px;
-          border: 1px solid #333;
-        }
-
-        .saved-policy-preview h3 {
-          margin: 0 0 12px 0;
-          font-size: 18px;
-          color: #fff;
-        }
-
-        .saved-policy-preview pre {
-          background: #1e1e1e;
-          padding: 16px;
-          border-radius: 4px;
-          font-family: monospace;
-          font-size: 14px;
-          line-height: 1.5;
-          overflow-x: auto;
         }
 
         @keyframes fadeIn {
