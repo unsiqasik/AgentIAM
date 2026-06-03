@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, field_serializer
+from pydantic import BaseModel, ConfigDict, field_serializer
 
 
 class AuditLogBase(BaseModel):
@@ -19,14 +19,13 @@ class AuditLog(AuditLogBase):
     id: int
     timestamp: datetime
 
+    model_config = ConfigDict(from_attributes=True)
+
     @field_serializer("timestamp")
     @staticmethod
     def serialize_timestamp(value: datetime) -> str:
         """Serialize datetime with full microsecond precision in ISO 8601 format."""
         return value.isoformat(timespec="microseconds")
-
-    class Config:
-        from_attributes = True
 
 
 class CheckPermissionRequest(BaseModel):
