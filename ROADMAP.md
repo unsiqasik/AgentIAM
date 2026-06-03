@@ -2,34 +2,30 @@
 
 This roadmap outlines the planned development and feature milestones for AgentIAM.
 
-## MVP (Current)
-*Completed Features:*
+## MVP (Completed)
+*Features:*
 - Core backend architecture with FastAPI and PostgreSQL.
-- React/Vite frontend scaffold.
-- Basic YAML policy evaluation engine.
-- Agent creation and management.
-- Simple audit logging for permission checks.
-- Issue: "Policy validation fails on empty resource list" has been fixed.
+- React/Vite frontend dashboard with full API integration.
+- Dynamic YAML policy evaluation engine with CIDR IP restrictions.
+- Agent management (List, Create, Select).
+- Audit & Analytics Dashboard (Charts + Live Log Feed).
+- Secure YAML validation and DoS protection.
+- Structured JSON logging.
 
-*Pending Features:*
-- Initial release of the React Dashboard for Agents and Audit Logs.
-- Secure YAML validation hardening.
-- Basic frontend integration with the backend API.
-
-## v0.2
+## v0.2 (In Progress)
 *Features:*
 - Implement Dark Mode in the frontend dashboard.
-- Policy editor with YAML syntax highlighting.
-- Add "Copy to Clipboard" for Agent IDs.
+- Policy versioning and history tracking.
+- Add "Copy to Clipboard" for Agent IDs (Done).
 
 *Security Improvements:*
-- Support CIDR-based IP restrictions in policies.
+- Support CIDR-based IP restrictions in policies (Done).
 - Implement rate limiting for `check_permission` endpoint.
-- Enforce password complexity requirements.
+- Enforce password complexity requirements (Done).
 
 *Technical Debt:*
-- Add structured logging across the backend service.
-- Optimize audit log database queries with indexes.
+- Add structured logging across the backend service (Done).
+- Optimize audit log database queries with indexes (Done).
 
 ## v0.3
 *Integrations:*

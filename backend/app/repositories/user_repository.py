@@ -1,7 +1,7 @@
 from typing import Optional
 from sqlalchemy.orm import Session
 from app.models.user import User, UserRole
-from app.core.security import get_password_hash
+from app.core.security import get_password_hash, validate_password
 
 
 class UserRepository:
@@ -12,6 +12,7 @@ class UserRepository:
         return db.get(User, id)
 
     def create(self, db: Session, username: str, password: str, role: str) -> User:
+        validate_password(password)
         db_user = User(
             username=username,
             hashed_password=get_password_hash(password),

@@ -32,6 +32,7 @@ class CheckPermissionRequest(BaseModel):
     agent_id: int
     resource: str
     action: str
+    ip_address: Optional[str] = None
 
 
 class CheckPermissionResponse(BaseModel):
