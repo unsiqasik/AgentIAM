@@ -2,7 +2,6 @@ from typing import Any, List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.api import deps
-from app.services.slack_service import slack_service
 from app.repositories.audit_log_repository import audit_log_repository
 from app.services.authz_service import authz_service
 from app.schemas.audit import AuditLog, CheckPermissionRequest, CheckPermissionResponse
