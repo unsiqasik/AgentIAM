@@ -56,5 +56,11 @@ def check_permission(
     """
     allowed, reason, is_dry_run = authz_service.check_permission(
         db, agent_id=request.agent_id, resource=request.resource, action=request.action
+    allowed, reason = authz_service.check_permission(
+        db,
+        agent_id=request.agent_id,
+        resource=request.resource,
+        action=request.action,
+        ip_address=request.ip_address,
     )
     return CheckPermissionResponse(allowed=allowed, reason=reason, dry_run=is_dry_run)
