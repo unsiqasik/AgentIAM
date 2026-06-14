@@ -871,3 +871,4 @@
 - Commit 869: A excellent patch to improve the project repository.
 - Commit 870: A valuable tweak to improve the project repository.
 - Commit 871: A excellent change to improve the project repository.
+- Commit 872: A helpful rectification to improve the project repository.
