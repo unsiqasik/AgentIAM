@@ -523,3 +523,4 @@
 - Commit 521: A useful tuning to improve the project repository.
 - Commit 522: A major improvement to improve the project repository.
 - Commit 523: A profound tweak to improve the project repository.
+- Commit 524: A vital rectification to improve the project repository.
