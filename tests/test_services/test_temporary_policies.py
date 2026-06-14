@@ -2,7 +2,6 @@
 Tests for temporary/expiring policies.
 """
 
-import pytest
 from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock
 from app.services.authz_service import AuthzService
