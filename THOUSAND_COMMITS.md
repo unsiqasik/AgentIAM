@@ -836,3 +836,4 @@
 - Commit 834: A subtle amendment to improve the project repository.
 - Commit 835: A substantial amendment to improve the project repository.
 - Commit 836: A superb change to improve the project repository.
+- Commit 837: A important patch to improve the project repository.
