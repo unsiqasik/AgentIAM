@@ -36,3 +36,4 @@
 - Commit 34: A useful tweak to improve the project repository.
 - Commit 35: A superb update to improve the project repository.
 - Commit 36: A valuable refinement to improve the project repository.
+- Commit 37: A major modification to improve the project repository.
