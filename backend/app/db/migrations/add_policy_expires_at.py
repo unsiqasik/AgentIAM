@@ -17,7 +17,7 @@ def upgrade():
             ALTER TABLE policies 
             ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP WITH TIME ZONE NULL
         """))
-        
+
         db.commit()
         print("Successfully added expires_at field to policies table")
     except Exception as e:
@@ -37,7 +37,7 @@ def downgrade():
             ALTER TABLE policies 
             DROP COLUMN IF EXISTS expires_at
         """))
-        
+
         db.commit()
         print("Successfully removed expires_at field from policies table")
     except Exception as e:
@@ -50,6 +50,7 @@ def downgrade():
 
 if __name__ == "__main__":
     import sys
+
     if len(sys.argv) > 1 and sys.argv[1] == "downgrade":
         downgrade()
     else:

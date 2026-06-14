@@ -28,7 +28,9 @@ class AuthzService:
 
         if not policy_obj:
             reason = "No policy found for this agent"
-        elif policy_obj.expires_at and policy_obj.expires_at < datetime.now(timezone.utc):
+        elif policy_obj.expires_at and policy_obj.expires_at < datetime.now(
+            timezone.utc
+        ):
             # Policy has expired
             decision = False
             reason = "Policy has expired"
