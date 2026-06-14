@@ -12,6 +12,7 @@ class Policy(Base):
         Integer, ForeignKey("agent.id"), unique=True, nullable=False
     )
     policy_yaml: Mapped[str] = mapped_column(Text, nullable=False)
+    current_version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
