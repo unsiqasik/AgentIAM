@@ -1,14 +1,23 @@
+import logging
 import yaml
-from typing import Tuple
+import ipaddress
+from typing import Tuple, Optional
 from sqlalchemy.orm import Session
 from app.repositories.policy_repository import policy_repository
 from app.repositories.audit_log_repository import audit_log_repository
 from app.schemas.audit import AuditLogCreate
 
+logger = logging.getLogger(__name__)
+
 
 class AuthzService:
     def check_permission(
-        self, db: Session, agent_id: int, resource: str, action: str
+        self,
+        db: Session,
+        agent_id: int,
+        resource: str,
+        action: str,
+        ip_address: Optional[str] = None,
     ) -> Tuple[bool, str]:
         # 1. Get policy for agent
         policy_obj = policy_repository.get_by_agent_id(db, agent_id=agent_id)
@@ -21,6 +30,35 @@ class AuthzService:
         else:
             try:
                 policy_data = yaml.safe_load(policy_obj.policy_yaml)
+
+                # Check for IP restrictions first
+                if "ip_restrictions" in policy_data:
+                    allowed_cidrs = policy_data["ip_restrictions"].get(
+                        "allowed_cidrs", []
+                    )
+                    if allowed_cidrs:
+                        if not ip_address:
+                            return (
+                                False,
+                                "IP address is required by policy but not provided",
+                            )
+
+                        try:
+                            request_ip = ipaddress.ip_address(ip_address)
+                            ip_allowed = False
+                            for cidr in allowed_cidrs:
+                                if request_ip in ipaddress.ip_network(cidr):
+                                    ip_allowed = True
+                                    break
+
+                            if not ip_allowed:
+                                return (
+                                    False,
+                                    f"IP address {ip_address} is not allowed by policy",
+                                )
+                        except ValueError as e:
+                            return False, f"Invalid IP address or CIDR: {str(e)}"
+
                 permissions = policy_data.get("permissions", {})
 
                 # Check for resource-level wildcard
@@ -51,6 +89,15 @@ class AuthzService:
             except Exception as e:
                 decision = False
                 reason = f"Error evaluating policy: {str(e)}"
+                logger.error(
+                    "policy evaluation failed",
+                    extra={
+                        "agent_id": agent_id,
+                        "resource": resource,
+                        "action": action,
+                        "error": str(e),
+                    },
+                )
 
         # 2. Log decision to audit trail
         audit_in = AuditLogCreate(
@@ -61,6 +108,18 @@ class AuthzService:
             reason=reason,
         )
         audit_log_repository.create(db, obj_in=audit_in)
+
+        logger.info(
+            "permission check",
+            extra={
+                "agent_id": agent_id,
+                "resource": resource,
+                "action": action,
+                "ip_address": ip_address,
+                "decision": "allow" if decision else "deny",
+                "reason": reason,
+            },
+        )
 
         return decision, reason
 

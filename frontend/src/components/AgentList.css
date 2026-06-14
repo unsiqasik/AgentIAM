@@ -5,9 +5,71 @@
 }
 
 .agent-list h2 {
-  margin-bottom: 16px;
+  margin: 0;
   font-size: 1.5rem;
   color: #1a1a2e;
+}
+
+.agent-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.create-agent-form {
+  display: flex;
+  gap: 8px;
+}
+
+.create-agent-form input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  min-width: 180px;
+}
+
+.create-agent-form button {
+  padding: 8px 16px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.create-agent-form button:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.create-agent-form button:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+.edit-policy-btn {
+  padding: 6px 12px;
+  background: white;
+  border: 1px solid #2563eb;
+  color: #2563eb;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.edit-policy-btn:hover {
+  background: #2563eb;
+  color: white;
+}
+
+.agent-actions-cell {
+  white-space: nowrap;
 }
 
 .agent-table {
