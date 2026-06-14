@@ -9,35 +9,74 @@ interface Agent {
 
 interface AgentListProps {
   apiBase?: string;
+  onSelectAgent?: (id: number) => void;
 }
 
-export function AgentList({ apiBase = '/api/v1' }: AgentListProps) {
+export function AgentList({ apiBase = '/api/v1', onSelectAgent }: AgentListProps) {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [newName, setNewName] = useState('');
+  const [newDescription, setNewDescription] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
+
+  const fetchAgents = useCallback(async (signal?: AbortSignal) => {
+    try {
+      const response = await fetch(`${apiBase}/agents/`, { signal });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch agents: ${response.statusText}`);
+      }
+      const data = await response.json();
+      setAgents(data);
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return;
+      setError(err instanceof Error ? err.message : 'Failed to load agents');
+    } finally {
+      setLoading(false);
+    }
+  }, [apiBase]);
 
   useEffect(() => {
     const controller = new AbortController();
-    const fetchAgents = async () => {
-      try {
-        const response = await fetch(`${apiBase}/agents/`, { signal: controller.signal });
-        if (!response.ok) {
-          throw new Error(`Failed to fetch agents: ${response.statusText}`);
-        }
-        const data = await response.json();
-        setAgents(data);
-      } catch (err) {
-        if (err instanceof DOMException && err.name === 'AbortError') return;
-        setError(err instanceof Error ? err.message : 'Failed to load agents');
-      } finally {
-        setLoading(false);
+    // Use microtask to avoid synchronous state update warning in React 19
+    Promise.resolve().then(() => {
+      if (!controller.signal.aborted) {
+        fetchAgents(controller.signal);
       }
-    };
-
-    fetchAgents();
+    });
     return () => controller.abort();
-  }, [apiBase]);
+  }, [fetchAgents]);
+
+  const handleCreateAgent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newName.trim()) return;
+
+    setIsCreating(true);
+    try {
+      const response = await fetch(`${apiBase}/agents/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newName,
+          description: newDescription || null,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to create agent');
+      }
+
+      setNewName('');
+      setNewDescription('');
+      await fetchAgents();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Error creating agent');
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   const copyToClipboard = useCallback(async (agentId: number) => {
     const idString = String(agentId);
@@ -77,7 +116,30 @@ export function AgentList({ apiBase = '/api/v1' }: AgentListProps) {
 
   return (
     <div className="agent-list">
-      <h2>Agents</h2>
+      <div className="agent-list-header">
+        <h2>Agents</h2>
+        <form className="create-agent-form" onSubmit={handleCreateAgent}>
+          <input
+            type="text"
+            placeholder="Agent Name"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            disabled={isCreating}
+            required
+          />
+          <input
+            type="text"
+            placeholder="Description (optional)"
+            value={newDescription}
+            onChange={(e) => setNewDescription(e.target.value)}
+            disabled={isCreating}
+          />
+          <button type="submit" disabled={isCreating || !newName.trim()}>
+            {isCreating ? 'Creating...' : 'Add Agent'}
+          </button>
+        </form>
+      </div>
+      
       <table className="agent-table">
         <thead>
           <tr>
@@ -85,6 +147,7 @@ export function AgentList({ apiBase = '/api/v1' }: AgentListProps) {
             <th>Name</th>
             <th>Description</th>
             <th>Created</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -109,6 +172,14 @@ export function AgentList({ apiBase = '/api/v1' }: AgentListProps) {
               </td>
               <td className="agent-date-cell">
                 {new Date(agent.created_at).toLocaleDateString()}
+              </td>
+              <td className="agent-actions-cell">
+                <button
+                  className="edit-policy-btn"
+                  onClick={() => onSelectAgent?.(agent.id)}
+                >
+                  Edit Policy
+                </button>
               </td>
             </tr>
           ))}
