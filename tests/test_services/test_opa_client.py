@@ -57,7 +57,9 @@ def test_check_permission_error(mock_session_class):
     mock_session = MagicMock()
     mock_session_class.return_value = mock_session
 
-    mock_session.post.side_effect = requests.exceptions.RequestException("Connection error")
+    mock_session.post.side_effect = requests.exceptions.RequestException(
+        "Connection error"
+    )
 
     client = OPAClient()
     result = client.check_permission("agent1", "github", "read")
@@ -105,7 +107,9 @@ def test_health_check_failure(mock_session_class):
     mock_session = MagicMock()
     mock_session_class.return_value = mock_session
 
-    mock_session.get.side_effect = requests.exceptions.RequestException("Connection error")
+    mock_session.get.side_effect = requests.exceptions.RequestException(
+        "Connection error"
+    )
 
     client = OPAClient()
     result = client.health_check()
