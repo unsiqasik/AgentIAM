@@ -2,12 +2,13 @@
 Tests for Policy Versioning API endpoints.
 """
 
-import pytest
 from fastapi.testclient import TestClient
 from app.core.config import settings
 
 
-def test_get_policy_versions_empty(client: TestClient, admin_token_headers: dict) -> None:
+def test_get_policy_versions_empty(
+    client: TestClient, admin_token_headers: dict
+) -> None:
     """Test getting versions for a non-existent policy."""
     response = client.get(
         f"{settings.API_V1_STR}/policies/999/versions",

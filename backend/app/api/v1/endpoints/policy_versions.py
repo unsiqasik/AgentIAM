@@ -17,7 +17,6 @@ from pydantic import BaseModel
 from app.api import deps
 from app.models.user import User
 from app.models.policy import Policy
-from app.models.policy_version import PolicyVersion
 from app.services.policy_version_service import policy_version_service
 
 router = APIRouter()
@@ -25,6 +24,7 @@ router = APIRouter()
 
 class PolicyVersionResponse(BaseModel):
     """Response for policy version."""
+
     id: int
     policy_id: int
     version: int
@@ -39,6 +39,7 @@ class PolicyVersionResponse(BaseModel):
 
 class PolicyVersionDiffResponse(BaseModel):
     """Response for version diff."""
+
     version1: dict
     version2: dict
     changed: bool
@@ -46,6 +47,7 @@ class PolicyVersionDiffResponse(BaseModel):
 
 class RollbackRequest(BaseModel):
     """Request for rollback."""
+
     version: int
     change_reason: str = None
 
@@ -60,16 +62,16 @@ def get_policy_versions(
 ) -> Any:
     """
     Get all versions of a policy.
-    
+
     Returns versions in reverse chronological order (newest first).
     """
     # Check if policy exists
     policy = db.query(Policy).filter(Policy.id == policy_id).first()
     if not policy:
         raise HTTPException(status_code=404, detail="Policy not found")
-    
+
     versions = policy_version_service.get_versions(db, policy_id, limit=limit)
-    
+
     return [
         PolicyVersionResponse(
             id=v.id,
@@ -99,11 +101,11 @@ def get_policy_version(
     policy = db.query(Policy).filter(Policy.id == policy_id).first()
     if not policy:
         raise HTTPException(status_code=404, detail="Policy not found")
-    
+
     version_obj = policy_version_service.get_version(db, policy_id, version)
     if not version_obj:
         raise HTTPException(status_code=404, detail="Version not found")
-    
+
     return PolicyVersionResponse(
         id=version_obj.id,
         policy_id=version_obj.policy_id,
@@ -125,14 +127,14 @@ def rollback_policy(
 ) -> Any:
     """
     Rollback a policy to a specific version.
-    
+
     This creates a new version with the old policy content.
     """
     # Check if policy exists
     policy = db.query(Policy).filter(Policy.id == policy_id).first()
     if not policy:
         raise HTTPException(status_code=404, detail="Policy not found")
-    
+
     # Perform rollback
     rolled_back_policy = policy_version_service.rollback_to_version(
         db,
@@ -141,13 +143,13 @@ def rollback_policy(
         change_reason=rollback_data.change_reason,
         changed_by=current_user.username,
     )
-    
+
     if not rolled_back_policy:
         raise HTTPException(status_code=404, detail="Version not found")
-    
+
     # Get the latest version (the rollback version)
     latest_version = policy_version_service.get_latest_version(db, policy_id)
-    
+
     return PolicyVersionResponse(
         id=latest_version.id,
         policy_id=latest_version.policy_id,
@@ -159,7 +161,9 @@ def rollback_policy(
     )
 
 
-@router.get("/{policy_id}/diff/{version1}/{version2}", response_model=PolicyVersionDiffResponse)
+@router.get(
+    "/{policy_id}/diff/{version1}/{version2}", response_model=PolicyVersionDiffResponse
+)
 def get_version_diff(
     *,
     db: Session = Depends(deps.get_db),
@@ -175,9 +179,9 @@ def get_version_diff(
     policy = db.query(Policy).filter(Policy.id == policy_id).first()
     if not policy:
         raise HTTPException(status_code=404, detail="Policy not found")
-    
+
     diff = policy_version_service.get_version_diff(db, policy_id, version1, version2)
     if not diff:
         raise HTTPException(status_code=404, detail="One or both versions not found")
-    
+
     return PolicyVersionDiffResponse(**diff)

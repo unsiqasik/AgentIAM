@@ -19,7 +19,7 @@ def upgrade():
             ALTER TABLE policies 
             ADD COLUMN IF NOT EXISTS current_version INTEGER DEFAULT 1 NOT NULL
         """))
-        
+
         # Create policy_versions table
         db.execute(text("""
             CREATE TABLE IF NOT EXISTS policy_versions (
@@ -33,7 +33,7 @@ def upgrade():
                 UNIQUE(policy_id, version)
             )
         """))
-        
+
         db.commit()
         print("Successfully added policy versioning support")
     except Exception as e:
@@ -50,13 +50,13 @@ def downgrade():
     try:
         # Drop policy_versions table
         db.execute(text("DROP TABLE IF EXISTS policy_versions"))
-        
+
         # Remove current_version column from policies table
         db.execute(text("""
             ALTER TABLE policies 
             DROP COLUMN IF EXISTS current_version
         """))
-        
+
         db.commit()
         print("Successfully removed policy versioning support")
     except Exception as e:
@@ -69,6 +69,7 @@ def downgrade():
 
 if __name__ == "__main__":
     import sys
+
     if len(sys.argv) > 1 and sys.argv[1] == "downgrade":
         downgrade()
     else:

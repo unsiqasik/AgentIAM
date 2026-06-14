@@ -15,13 +15,14 @@ from app.db.base_class import Base
 class PolicyVersion(Base):
     """
     Stores historical versions of policies.
-    
+
     Each time a policy is updated, a new version is created.
     This allows for:
     - Complete audit trail of policy changes
     - Rollback to previous versions
     - Compliance reporting
     """
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     policy_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("policy.id"), nullable=False, index=True

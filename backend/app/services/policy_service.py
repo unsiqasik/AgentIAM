@@ -2,7 +2,6 @@ import yaml
 from typing import Dict, Any
 from sqlalchemy.orm import Session
 from app.repositories.policy_repository import policy_repository
-from app.services.policy_version_service import policy_version_service
 from app.schemas.policy import PolicyCreate, PolicyUpdate
 from fastapi import HTTPException
 
