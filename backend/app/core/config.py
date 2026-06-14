@@ -23,6 +23,8 @@ class Settings(BaseSettings):
 
     BACKEND_CORS_ORIGINS: List[str] = ["*"]
 
+    LOG_LEVEL: str = "INFO"
+
     class Config:
         case_sensitive = True
         env_file = ".env"

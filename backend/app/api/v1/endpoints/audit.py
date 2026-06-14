@@ -56,6 +56,10 @@ def check_permission(
     For MVP, we allow open access for demonstration.
     """
     allowed, reason = authz_service.check_permission(
-        db, agent_id=request.agent_id, resource=request.resource, action=request.action
+        db,
+        agent_id=request.agent_id,
+        resource=request.resource,
+        action=request.action,
+        ip_address=request.ip_address,
     )
     return CheckPermissionResponse(allowed=allowed, reason=reason)

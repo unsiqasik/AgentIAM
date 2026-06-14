@@ -5,13 +5,87 @@ from app.repositories.policy_repository import policy_repository
 from app.schemas.policy import PolicyCreate, PolicyUpdate
 from fastapi import HTTPException
 
+# Security limits for YAML parsing
+MAX_YAML_NESTING_DEPTH = 10
+MAX_YAML_KEYS = 50
+MAX_YAML_STRING_LENGTH = 1000
+
+
+class SafeYAMLLoader(yaml.SafeLoader):
+    """Custom YAML loader with resource limits to prevent DoS attacks."""
+
+    pass
+
+
+def _construct_limited_mapping(loader, node):
+    """Construct YAML mapping with depth and key count limits."""
+    loader.flatten_mapping(node)
+    pairs = loader.construct_pairs(node)
+
+    # Limit total keys
+    if len(pairs) > MAX_YAML_KEYS:
+        raise ValueError(
+            f"YAML document has too many keys ({len(pairs)}). "
+            f"Maximum allowed: {MAX_YAML_KEYS}"
+        )
+
+    return dict(pairs)
+
+
+def _construct_limited_string(loader, node):
+    """Construct YAML string with length limit."""
+    value = loader.construct_scalar(node)
+    if len(value) > MAX_YAML_STRING_LENGTH:
+        raise ValueError(
+            f"YAML string is too long ({len(value)} chars). "
+            f"Maximum allowed: {MAX_YAML_STRING_LENGTH}"
+        )
+    return value
+
+
+# Register custom constructors
+SafeYAMLLoader.add_constructor(
+    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+    _construct_limited_mapping,
+)
+SafeYAMLLoader.add_constructor(
+    yaml.resolver.BaseResolver.DEFAULT_SCALAR_TAG,
+    _construct_limited_string,
+)
+
+
+def _check_nesting_depth(
+    data: Any, max_depth: int = MAX_YAML_NESTING_DEPTH, current_depth: int = 0
+) -> None:
+    """Recursively check YAML nesting depth to prevent Billion Laughs-style attacks."""
+    if current_depth > max_depth:
+        raise ValueError(
+            f"YAML nesting depth exceeds maximum ({max_depth}). "
+            f"This may indicate a YAML bomb attack."
+        )
+
+    if isinstance(data, dict):
+        for value in data.values():
+            _check_nesting_depth(value, max_depth, current_depth + 1)
+    elif isinstance(data, list):
+        for item in data:
+            _check_nesting_depth(item, max_depth, current_depth + 1)
+
 
 class PolicyService:
     def validate_yaml(self, policy_yaml: str) -> Dict[str, Any]:
         try:
-            data = yaml.safe_load(policy_yaml)
+            # Use custom SafeLoader with resource limits
+            data = yaml.load(  # nosec B506 - SafeYAMLLoader extends SafeLoader with resource limits
+                policy_yaml, Loader=SafeYAMLLoader
+            )
+
             if not isinstance(data, dict):
                 raise ValueError("Policy must be a YAML object")
+
+            # Check nesting depth to prevent YAML bombs
+            _check_nesting_depth(data)
+
             if "permissions" not in data:
                 raise ValueError("Policy must contain 'permissions' key")
 
